@@ -1,0 +1,26 @@
+{
+  "name": "secret-capsule-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "dev": "concurrently \"npm run dev --workspace=@secret-capsule/server\" \"npm run dev --workspace=@secret-capsule/frontend\"",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.22",
+    "concurrently": "^8.0.0",
+    "eslint": "^8.0.0",
+    "husky": "^8.0.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.0.0",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.0.0"
+  }
+}
