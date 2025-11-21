@@ -24,8 +24,11 @@ export default function AuthPage() {
             const { data } = await api.post(endpoint, payload);
             login(data.user);
             navigate('/dashboard');
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'An error occurred');
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error && 'response' in err
+                ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                : undefined;
+            setError(errorMessage || 'An error occurred');
         }
     };
 
