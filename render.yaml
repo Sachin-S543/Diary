@@ -1,0 +1,42 @@
+services:
+  # Backend API Server
+  - type: web
+    name: secret-capsule-api
+    runtime: node
+    buildCommand: npm ci && npm run build --workspace=@secret-capsule/server
+    startCommand: npm run start --workspace=@secret-capsule/server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_PATH
+        value: /opt/render/project/src/apps/server/data
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: secret-capsule-frontend
+          property: host
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/apps/server/data
+      sizeGB: 1
+
+  # Frontend React App
+  - type: web
+    name: secret-capsule-frontend
+    runtime: static
+    buildCommand: npm ci && npm run build --workspace=@secret-capsule/frontend
+    staticPublishPath: apps/frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: secret-capsule-api
+          property: host
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

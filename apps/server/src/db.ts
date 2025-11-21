@@ -2,7 +2,9 @@ import Database from 'better-sqlite3';
 import { User, DiaryEntry } from "@secret-capsule/types";
 import path from 'path';
 
-const dbPath = path.resolve(__dirname, '../database.sqlite');
+const dbPath = process.env.DATABASE_PATH
+    ? path.resolve(process.env.DATABASE_PATH, 'database.sqlite')
+    : path.resolve(__dirname, '../database.sqlite');
 const sql = new Database(dbPath);
 
 // Initialize Tables
