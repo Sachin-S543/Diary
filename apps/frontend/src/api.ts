@@ -1,9 +1,13 @@
 import { Capsule } from '@secret-capsule/types';
+import mockApi from './mockApi';
 
 // Use environment variable or fallback to localhost
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
 
-const api = {
+console.log('API Configuration:', { API_URL, USE_MOCK });
+
+const realApi = {
     auth: {
         async signup(data: { email: string; username: string; password: string }) {
             const response = await fetch(`${API_URL}/auth/signup`, {
@@ -100,5 +104,7 @@ const api = {
         }
     },
 };
+
+const api = USE_MOCK ? mockApi : realApi;
 
 export default api;
