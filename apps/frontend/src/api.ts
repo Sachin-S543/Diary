@@ -5,8 +5,6 @@ import mockApi from './mockApi';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
 
-console.log('API Configuration:', { API_URL, USE_MOCK });
-
 const realApi = {
     auth: {
         async signup(data: { email: string; username: string; password: string }) {
