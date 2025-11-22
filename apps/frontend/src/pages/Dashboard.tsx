@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useCryptoStore } from '../store/cryptoStore';
-import { deriveKey, decryptData } from '@secret-capsule/crypto-utils';
+import { deriveKey } from '@secret-capsule/crypto-utils';
 import EntryEditor from '../components/EntryEditor';
 import EntryList from '../components/EntryList';
-import api from '../api';
 
 export default function Dashboard() {
     const { user, logout } = useAuthStore();
@@ -24,18 +23,7 @@ export default function Dashboard() {
             const salt = btoa(user?.id || 'default-salt');
             const derivedKey = await deriveKey(diaryPassword, salt);
 
-            // Verify key by trying to decrypt the first entry if it exists
-            const { data: entries } = await api.get('/entries');
-            if (entries.length > 0) {
-                const testEntry = entries[0];
-                try {
-                    const titleObj = JSON.parse(testEntry.title);
-                    await decryptData(titleObj.ciphertext, titleObj.iv, derivedKey);
-                } catch (e) {
-                    throw new Error('Incorrect password');
-                }
-            }
-
+            // Set the key - verification will happen when trying to decrypt entries
             setKey(derivedKey);
         } catch (error: any) {
             console.error(error);
