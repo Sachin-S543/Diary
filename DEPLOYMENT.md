@@ -114,3 +114,62 @@ git push origin main
 ```
 
 Render will automatically redeploy your application.
+
+## Backend Docker Deployment (GitHub Container Registry)
+
+The backend can now be built as a Docker image and pushed to GitHub Container Registry (GHCR). You can then run the container on any platform that supports Docker (e.g., Fly.io, Railway, Render, or your own server).
+
+### 1. Build & Push Image (CI)
+
+The workflow `.github/workflows/docker.yml` automatically builds the Docker image on every push to `main` that touches the `apps/server` directory and pushes it to `ghcr.io/<your‑username>/secret-capsule-backend:latest`.
+
+### 2. Run the Container
+
+```bash
+docker run -d \
+  -p 3001:3001 \
+  -e NODE_ENV=production \
+  -e JWT_SECRET=$(openssl rand -hex 32) \
+  -e FRONTEND_URL=https://<your‑github‑pages‑url> \
+  -e DATABASE_PATH=/data/diary.db \
+  -v ./data:/data \
+  ghcr.io/<your‑username>/secret-capsule-backend:latest
+```
+
+- **Ports**: Exposes port `3001` (default API port). Adjust if you changed the backend config.
+- **Persistent storage**: Mount a local `./data` directory (or a volume) to `/data` so the SQLite file persists.
+- **Environment variables**: Same as the Render deployment (`JWT_SECRET`, `FRONTEND_URL`, `DATABASE_PATH`).
+
+### 3. Update Frontend API URL
+
+The frontend expects the API at `VITE_API_URL`. Set this environment variable in GitHub Pages (Settings → Pages → Environment variables) or in a `.env.production` file:
+
+```env
+VITE_API_URL=https://<your‑hosted‑backend‑url>
+```
+
+### 4. Redeploy
+
+After any change, simply push to GitHub:
+
+```bash
+git add .
+git commit -m "Update backend"
+git push origin main
+```
+
+The CI workflow will rebuild and push a new image; restart your container to pick up the new version.
+
+### 5. Optional: Deploy to Fly.io (one‑click)
+
+If you prefer a managed platform, you can deploy the image to Fly.io:
+
+```bash
+fly launch --image ghcr.io/<your‑username>/secret-capsule-backend:latest
+```
+
+Follow Fly.io prompts to create an app and attach a volume for SQLite persistence.
+
+---
+
+**Note**: The frontend continues to be deployed to GitHub Pages as described earlier. The backend Docker image can be run anywhere you like; the guide above shows a generic Docker run command and an example with Fly.io.

@@ -9,9 +9,15 @@
 
 - **Zero-Knowledge Privacy**: Your diary entries are encrypted on your device using a key derived from your separate "Diary Password". The server never sees your raw data.
 - **Futuristic UI**: A premium, glassmorphism-inspired interface built with React and Tailwind CSS.
-- **Secure Authentication**: Secure session management with HttpOnly cookies and JWT.
-- **Local-First**: Works offline using IndexedDB (coming soon), with encrypted cloud sync.
+- **Secure Authentication**: Secure session management.
+- **Local-First**: Fully functional offline mode using IndexedDB.
 - **Open Source**: MIT Licensed.
+
+## 🚀 Live Demo
+
+Check out the live version running on GitHub Pages: **[Launch Secret Capsule](https://sachin-s543.github.io/Diary/)**
+
+> **Note:** The demo runs in "Client-Only Mode". All data is stored securely in your browser's IndexedDB and is never sent to a server.
 
 ## 🏗 Architecture
 

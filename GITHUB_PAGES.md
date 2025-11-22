@@ -26,22 +26,21 @@ After deployment, your app will be available at:
 
 ## Important Notes
 
-> [!WARNING]
-> **Backend Not Included**
+> [!NOTE]
+> **Client-Only Mode**
 > 
-> GitHub Pages only hosts static sites (frontend only). Your backend API is NOT deployed.
+> The GitHub Pages deployment runs in "Client-Only Mode". It uses **IndexedDB** to store all your data securely within your browser.
 > 
-> **Options for Backend:**
-> 1. Deploy backend separately on Render/Railway (see DEPLOYMENT.md)
-> 2. Use a different platform for full-stack deployment
-> 3. For now, the app will work in "offline mode" without backend features
+> This means:
+> 1. Your data is safe and encrypted on your device.
+> 2. You don't need a backend server for the app to work.
+> 3. Data is NOT synced between devices (unless you deploy the backend separately).
 
 ## Enable GitHub Pages
 
 Before the deployment works, you need to enable GitHub Pages in your repository:
 
 1. Go to your GitHub repository: https://github.com/Sachin-S543/Diary
-2. Click **Settings** → **Pages**
 3. Under "Build and deployment":
    - Source: **GitHub Actions**
 4. Save the settings

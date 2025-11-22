@@ -15,20 +15,19 @@ export default function AuthPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        try {
-            const endpoint = isLogin ? '/auth/login' : '/auth/signup';
-            const payload = isLogin
-                ? { identifier: email || username, password }
-                : { email, username, password };
 
-            const { data } = await api.post(endpoint, payload);
-            login(data.user);
-            navigate('/dashboard');
-        } catch (err: unknown) {
-            const errorMessage = err instanceof Error && 'response' in err
-                ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-                : undefined;
-            setError(errorMessage || 'An error occurred');
+        try {
+            if (isLogin) {
+                const { data } = await api.auth.login({ identifier: email, password });
+                login(data.user);
+                navigate('/dashboard');
+            } else {
+                const { data } = await api.auth.signup({ email, username, password });
+                login(data.user);
+                navigate('/dashboard');
+            }
+        } catch (err: any) {
+            setError(err.message || 'Authentication failed');
         }
     };
 
