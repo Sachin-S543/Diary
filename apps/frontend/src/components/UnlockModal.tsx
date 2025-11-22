@@ -24,26 +24,15 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
             try {
                 const keys = await deriveCapsuleKeys(password, capsule.salt);
 
-                // Decrypt Title
-                const title = await decryptCapsule({
-                    ciphertext: capsule.encryptedTitle,
-                    iv: capsule.iv, // Note: Title and Content share IV/HMAC in this simple model? 
-                    // WAIT: The data model has `encryptedTitle` and `encryptedContent`.
-                    // But `iv` and `hmac` are top level.
-                    // This implies either:
-                    // 1. They are concatenated and encrypted together.
-                    // 2. Or the IV/HMAC applies to the *content* and title is separate?
-                    // The `Capsule` interface has `iv`, `salt`, `hmac`.
-                    // If I encrypt them separately, I need separate IVs and HMACs.
-                    // The `encryptCapsule` function returns one ciphertext.
-                    // So I should probably JSON.stringify({ title, content }) and encrypt that as a single blob.
-                    // Let's assume that's how `CreateCapsule` works.
+                // Decrypt the content (title and content are encrypted together as JSON)
+                const decryptedPayload = await decryptCapsule({
+                    ciphertext: capsule.encryptedContent,
+                    iv: capsule.iv,
                     hmac: capsule.hmac
                 }, keys);
 
-                // Wait, `decryptCapsule` returns string.
-                // If I encrypted a JSON string, I need to parse it.
-                const data = JSON.parse(title); // 'title' here is actually the decrypted payload
+                // Parse the JSON payload
+                const data = JSON.parse(decryptedPayload);
 
                 onUnlock(data, keys);
             } catch (err) {

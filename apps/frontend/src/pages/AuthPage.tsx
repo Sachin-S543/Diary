@@ -37,9 +37,7 @@ export default function AuthPage() {
                 login(data.user);
                 navigate('/dashboard');
             } else {
-                if (strength < 3) {
-                    throw new Error('Password is too weak. Use mixed case, numbers, and symbols.');
-                }
+                // No password strength requirement - user can choose any password
                 const { data } = await api.auth.signup({ email, username, password });
                 login(data.user);
                 navigate('/dashboard');
@@ -124,8 +122,8 @@ export default function AuthPage() {
                                     <div
                                         key={i}
                                         className={`flex-1 rounded-full transition-all duration-300 ${strength >= i
-                                                ? (strength < 3 ? 'bg-red-500' : strength < 4 ? 'bg-yellow-500' : 'bg-green-500')
-                                                : 'bg-white/10'
+                                            ? (strength < 3 ? 'bg-red-500' : strength < 4 ? 'bg-yellow-500' : 'bg-green-500')
+                                            : 'bg-white/10'
                                             }`}
                                     />
                                 ))}

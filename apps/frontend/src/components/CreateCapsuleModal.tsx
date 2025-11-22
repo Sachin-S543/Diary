@@ -25,10 +25,7 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
             return;
         }
 
-        if (password.length < 8) {
-            setError('Password must be at least 8 characters');
-            return;
-        }
+        // No minimum password length - user can choose any password
 
         setLoading(true);
 
