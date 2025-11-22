@@ -27,6 +27,9 @@ const api = {
 
             await clientDb.createUser(user, data.password);
 
+            // Store auth state in localStorage
+            localStorage.setItem('currentUserId', user.id);
+
             return { data: { user } };
         },
 
