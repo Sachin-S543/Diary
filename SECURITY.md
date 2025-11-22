@@ -3,7 +3,7 @@
 ## Reporting a Vulnerability
 
 Please do **NOT** report security vulnerabilities via public GitHub issues.
-If you find a security issue, please email **security@example.com**.
+If you find a security issue, please email **sachinsathiya06@gmail.com**.
 
 ## Core Security Concepts
 
