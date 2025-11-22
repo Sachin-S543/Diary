@@ -10,9 +10,9 @@ const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-do-not-use-in-prod";
 
 const SignupSchema = z.object({
-    username: z.string().min(3),
+    username: z.string().min(1),
     email: z.string().email(),
-    password: z.string().min(8),
+    password: z.string().min(1), // Allow any password
 });
 
 const LoginSchema = z.object({
