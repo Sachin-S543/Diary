@@ -33,13 +33,13 @@ export default function AuthPage() {
 
         try {
             if (isLogin) {
-                const { data } = await api.auth.login({ identifier: email, password });
-                login(data.user);
+                const { user } = await api.auth.login({ identifier: email, password });
+                login(user);
                 navigate('/dashboard');
             } else {
                 // No password strength requirement - user can choose any password
-                const { data } = await api.auth.signup({ email, username, password });
-                login(data.user);
+                const { user } = await api.auth.signup({ email, username, password });
+                login(user);
                 navigate('/dashboard');
             }
         } catch (err: any) {

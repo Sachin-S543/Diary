@@ -32,6 +32,9 @@ jobs:
         
       - name: Build frontend
         run: npm run build --workspace=@secret-capsule/frontend
+        env:
+          VITE_USE_MOCK_API: "true"
+          VITE_API_URL: "http://localhost:3001"
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
