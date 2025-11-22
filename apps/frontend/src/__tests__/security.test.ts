@@ -1,42 +1,43 @@
 import { describe, it, expect } from 'vitest';
-import { deriveKey, encryptData, decryptData } from '@secret-capsule/crypto-utils';
+import { deriveCapsuleKeys, encryptCapsule, decryptCapsule, generateSalt } from '@secret-capsule/crypto-utils';
 
 describe('Security System', () => {
-    it('should derive a key from a password', async () => {
+    it('should derive keys from a password', async () => {
         const password = 'my-secret-password';
-        const salt = btoa('user-unique-salt');
-        const key = await deriveKey(password, salt);
+        const salt = generateSalt();
+        const keys = await deriveCapsuleKeys(password, salt);
 
-        expect(key).toBeDefined();
-        expect(key.algorithm.name).toBe('AES-GCM');
+        expect(keys).toBeDefined();
+        expect(keys.encKey.algorithm.name).toBe('AES-GCM');
+        expect(keys.macKey.algorithm.name).toBe('HMAC');
     });
 
     it('should encrypt and decrypt data correctly', async () => {
         const password = 'my-secret-password';
-        const salt = btoa('user-unique-salt');
-        const key = await deriveKey(password, salt);
+        const salt = generateSalt();
+        const keys = await deriveCapsuleKeys(password, salt);
 
         const originalText = 'This is a secret message';
-        const { ciphertext, iv } = await encryptData(originalText, key);
+        const encrypted = await encryptCapsule(originalText, keys);
 
-        expect(ciphertext).toBeDefined();
-        expect(iv).toBeDefined();
-        expect(ciphertext).not.toBe(originalText); // Ensure it's actually encrypted
+        expect(encrypted.ciphertext).toBeDefined();
+        expect(encrypted.iv).toBeDefined();
+        expect(encrypted.hmac).toBeDefined();
+        expect(encrypted.ciphertext).not.toBe(originalText);
 
-        const decryptedText = await decryptData(ciphertext, iv, key);
+        const decryptedText = await decryptCapsule(encrypted, keys);
         expect(decryptedText).toBe(originalText);
     });
 
-    it('should fail to decrypt with wrong key', async () => {
+    it('should fail to decrypt with wrong key (HMAC failure)', async () => {
         const password = 'my-secret-password';
-        const salt = btoa('user-unique-salt');
-        const key = await deriveKey(password, salt);
-
-        const wrongKey = await deriveKey('wrong-password', salt);
+        const salt = generateSalt();
+        const keys = await deriveCapsuleKeys(password, salt);
+        const wrongKeys = await deriveCapsuleKeys('wrong-password', salt);
 
         const originalText = 'This is a secret message';
-        const { ciphertext, iv } = await encryptData(originalText, key);
+        const encrypted = await encryptCapsule(originalText, keys);
 
-        await expect(decryptData(ciphertext, iv, wrongKey)).rejects.toThrow();
+        await expect(decryptCapsule(encrypted, wrongKeys)).rejects.toThrow();
     });
 });

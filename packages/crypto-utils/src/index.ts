@@ -10,66 +10,131 @@ export const base64ToBuffer = (base64: string): ArrayBuffer => {
     return Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer;
 };
 
-// 1. Derive Key from Password (PBKDF2)
-export const deriveKey = async (password: string, salt: string): Promise<CryptoKey> => {
+export interface CapsuleKeys {
+    encKey: CryptoKey;
+    macKey: CryptoKey;
+}
+
+export interface EncryptedContent {
+    ciphertext: string;
+    iv: string;
+    hmac: string;
+}
+
+// 1. Generate Random Salt (128-bit)
+export const generateSalt = (): string => {
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    return bufferToBase64(salt.buffer);
+};
+
+// 2. Derive Keys from Password (PBKDF2 - 200k iterations)
+// Derives 512 bits, splits into 256-bit AES key and 256-bit HMAC key
+export const deriveCapsuleKeys = async (password: string, salt: string): Promise<CapsuleKeys> => {
     const keyMaterial = await window.crypto.subtle.importKey(
         "raw",
         enc.encode(password),
         { name: "PBKDF2" },
         false,
-        ["deriveKey"]
+        ["deriveBits"]
     );
 
-    return window.crypto.subtle.deriveKey(
+    const derivedBits = await window.crypto.subtle.deriveBits(
         {
             name: "PBKDF2",
             salt: base64ToBuffer(salt),
-            iterations: 100000,
+            iterations: 200000,
             hash: "SHA-256",
         },
         keyMaterial,
-        { name: "AES-GCM", length: 256 },
-        true, // extractable? No, keep it internal usually, but for now true for debugging
+        512 // 256 bits for AES + 256 bits for HMAC
+    );
+
+    const encKeyBuffer = derivedBits.slice(0, 32);
+    const macKeyBuffer = derivedBits.slice(32, 64);
+
+    const encKey = await window.crypto.subtle.importKey(
+        "raw",
+        encKeyBuffer,
+        { name: "AES-GCM" },
+        false,
         ["encrypt", "decrypt"]
     );
+
+    const macKey = await window.crypto.subtle.importKey(
+        "raw",
+        macKeyBuffer,
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign", "verify"]
+    );
+
+    return { encKey, macKey };
 };
 
-// 2. Encrypt Data
-export const encryptData = async (text: string, key: CryptoKey): Promise<{ ciphertext: string; iv: string }> => {
-    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+// 3. Encrypt Data (AES-GCM + HMAC)
+export const encryptCapsule = async (text: string, keys: CapsuleKeys): Promise<EncryptedContent> => {
+    const iv = window.crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV
     const encoded = enc.encode(text);
 
-    const ciphertext = await window.crypto.subtle.encrypt(
-        {
-            name: "AES-GCM",
-            iv: iv,
-        },
-        key,
+    // Encrypt
+    const ciphertextBuffer = await window.crypto.subtle.encrypt(
+        { name: "AES-GCM", iv },
+        keys.encKey,
         encoded
     );
 
+    // HMAC (IV + Ciphertext)
+    const dataToMac = new Uint8Array(iv.byteLength + ciphertextBuffer.byteLength);
+    dataToMac.set(iv, 0);
+    dataToMac.set(new Uint8Array(ciphertextBuffer), iv.byteLength);
+
+    const hmacBuffer = await window.crypto.subtle.sign(
+        "HMAC",
+        keys.macKey,
+        dataToMac
+    );
+
     return {
-        ciphertext: bufferToBase64(ciphertext),
+        ciphertext: bufferToBase64(ciphertextBuffer),
         iv: bufferToBase64(iv.buffer),
+        hmac: bufferToBase64(hmacBuffer),
     };
 };
 
-// 3. Decrypt Data
-export const decryptData = async (ciphertext: string, iv: string, key: CryptoKey): Promise<string> => {
+// 4. Decrypt Data (Verify HMAC + AES-GCM)
+export const decryptCapsule = async (
+    encrypted: EncryptedContent,
+    keys: CapsuleKeys
+): Promise<string> => {
+    const ivBuffer = base64ToBuffer(encrypted.iv);
+    const ciphertextBuffer = base64ToBuffer(encrypted.ciphertext);
+    const hmacBuffer = base64ToBuffer(encrypted.hmac);
+
+    // Verify HMAC
+    const dataToVerify = new Uint8Array(ivBuffer.byteLength + ciphertextBuffer.byteLength);
+    dataToVerify.set(new Uint8Array(ivBuffer), 0);
+    dataToVerify.set(new Uint8Array(ciphertextBuffer), ivBuffer.byteLength);
+
+    const isValid = await window.crypto.subtle.verify(
+        "HMAC",
+        keys.macKey,
+        hmacBuffer,
+        dataToVerify
+    );
+
+    if (!isValid) {
+        throw new Error("Integrity check failed: HMAC invalid");
+    }
+
+    // Decrypt
     const decrypted = await window.crypto.subtle.decrypt(
         {
             name: "AES-GCM",
-            iv: base64ToBuffer(iv),
+            iv: ivBuffer,
         },
-        key,
-        base64ToBuffer(ciphertext)
+        keys.encKey,
+        ciphertextBuffer
     );
 
     return dec.decode(decrypted);
-};
-
-// 4. Generate Random Salt
-export const generateSalt = (): string => {
-    const salt = window.crypto.getRandomValues(new Uint8Array(16));
-    return bufferToBase64(salt.buffer);
 };

@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import crypto from "crypto";
 import { db } from "./db";
 import { User } from "@secret-capsule/types";
 
@@ -30,14 +31,18 @@ router.post("/signup", async (req: Request, res: Response) => {
         if (existingUser) return res.status(400).json({ message: "Username already taken" });
 
         const passwordHash = await bcrypt.hash(password, 10);
+        const salt = crypto.randomBytes(16).toString('base64'); // Salt for client-side PBKDF2
+
         const newUser: User = {
-            id: Math.random().toString(36).substring(7),
+            id: crypto.randomUUID(),
             username,
             email,
+            passwordHash,
+            salt,
             createdAt: new Date().toISOString(),
         };
 
-        await db.createUser(newUser, passwordHash);
+        await db.createUser(newUser);
 
         const token = jwt.sign({ userId: newUser.id }, JWT_SECRET, { expiresIn: "7d" });
 
@@ -47,8 +52,10 @@ router.post("/signup", async (req: Request, res: Response) => {
             sameSite: "lax",
         });
 
-        res.status(201).json({ user: newUser, token });
+        const { passwordHash: _, ...safeUser } = newUser;
+        res.status(201).json({ user: safeUser, token });
     } catch (error) {
+        console.error(error);
         res.status(400).json({ message: "Invalid input", error });
     }
 });

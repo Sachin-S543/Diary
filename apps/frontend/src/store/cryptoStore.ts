@@ -1,13 +1,23 @@
 import { create } from 'zustand';
+import { CapsuleKeys } from '@secret-capsule/crypto-utils';
 
 interface CryptoState {
-    key: CryptoKey | null;
-    setKey: (key: CryptoKey) => void;
-    clearKey: () => void;
+    // Map of capsuleId -> Keys
+    capsuleKeys: Record<string, CapsuleKeys>;
+    setCapsuleKeys: (id: string, keys: CapsuleKeys) => void;
+    removeCapsuleKeys: (id: string) => void;
+    clearAllKeys: () => void;
 }
 
 export const useCryptoStore = create<CryptoState>((set) => ({
-    key: null,
-    setKey: (key) => set({ key }),
-    clearKey: () => set({ key: null }),
+    capsuleKeys: {},
+    setCapsuleKeys: (id, keys) => set((state) => ({
+        capsuleKeys: { ...state.capsuleKeys, [id]: keys }
+    })),
+    removeCapsuleKeys: (id) => set((state) => {
+        const newKeys = { ...state.capsuleKeys };
+        delete newKeys[id];
+        return { capsuleKeys: newKeys };
+    }),
+    clearAllKeys: () => set({ capsuleKeys: {} }),
 }));

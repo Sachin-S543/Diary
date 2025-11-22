@@ -22,11 +22,36 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-    const { checkAuth } = useAuthStore();
+    const { checkAuth, logout } = useAuthStore();
 
     useEffect(() => {
         checkAuth();
-    }, [checkAuth]);
+
+        // Session Timeout (20 mins)
+        let timeout: NodeJS.Timeout;
+        const resetTimer = () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                if (useAuthStore.getState().isAuthenticated) {
+                    logout();
+                    // Optional: Redirect or show message
+                }
+            }, 20 * 60 * 1000);
+        };
+
+        window.addEventListener('mousemove', resetTimer);
+        window.addEventListener('keydown', resetTimer);
+        window.addEventListener('click', resetTimer);
+
+        resetTimer();
+
+        return () => {
+            clearTimeout(timeout);
+            window.removeEventListener('mousemove', resetTimer);
+            window.removeEventListener('keydown', resetTimer);
+            window.removeEventListener('click', resetTimer);
+        };
+    }, [checkAuth, logout]);
 
     return (
         <HashRouter>

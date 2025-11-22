@@ -2,17 +2,24 @@ export interface User {
     id: string;
     username: string;
     email: string;
+    passwordHash: string; // bcrypt hash
+    salt: string; // Random user salt for PBKDF2
     createdAt: string;
 }
 
-export interface DiaryEntry {
+export type SafeUser = Omit<User, 'passwordHash'>;
+
+export interface Capsule {
     id: string;
     userId: string;
-    title: string; // Encrypted
-    content: string; // Encrypted
-    tags: string[]; // Encrypted or Plaintext (Privacy choice: Encrypted usually, but harder to search) -> Let's keep them encrypted for now, or plaintext for server-side filtering if user allows. Requirement says "client-side search", so encrypted is fine.
+    encryptedTitle: string;
+    encryptedContent: string;
+    iv: string; // Base64
+    salt: string; // Base64 (Per-capsule salt)
+    hmac: string; // Base64 (HMAC-SHA256)
     createdAt: string;
     updatedAt: string;
+    size: number; // Size in bytes (approx)
 }
 
 export interface AuthResponse {
@@ -26,7 +33,8 @@ export interface ApiError {
 }
 
 export interface EncryptedData {
-    ciphertext: string; // Base64
-    iv: string; // Base64
-    salt: string; // Base64 (for key derivation if per-entry, but usually per-user)
+    ciphertext: string;
+    iv: string;
+    salt: string;
+    hmac: string;
 }

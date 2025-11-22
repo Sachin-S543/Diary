@@ -1,165 +1,106 @@
-import { clientDb } from './lib/clientDb';
-import { DiaryEntry } from '@secret-capsule/types';
+import { Capsule } from '@secret-capsule/types';
 
-// Mock API interface that uses IndexedDB instead of HTTP requests
+const API_URL = 'http://localhost:3001';
+
 const api = {
-    // Auth endpoints
     auth: {
         async signup(data: { email: string; username: string; password: string }) {
-            // Check if user already exists
-            const existingEmail = await clientDb.findUserByEmail(data.email);
-            if (existingEmail) {
-                throw new Error('Email already registered');
+            const response = await fetch(`${API_URL}/auth/signup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Signup failed');
             }
-
-            const existingUsername = await clientDb.findUserByUsername(data.username);
-            if (existingUsername) {
-                throw new Error('Username already taken');
-            }
-
-            // Create new user
-            const user = {
-                id: crypto.randomUUID(),
-                email: data.email,
-                username: data.username,
-                createdAt: new Date().toISOString(),
-            };
-
-            await clientDb.createUser(user, data.password);
-
-            // Store auth state in localStorage
-            localStorage.setItem('currentUserId', user.id);
-
-            return { data: { user } };
+            return await response.json();
         },
 
         async login(data: { identifier: string; password: string }) {
-            // Find user by email or username
-            let user = await clientDb.findUserByEmail(data.identifier);
-            if (!user) {
-                user = await clientDb.findUserByUsername(data.identifier);
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Login failed');
             }
-
-            if (!user) {
-                throw new Error('Invalid credentials');
-            }
-
-            // Verify password
-            const isValid = await clientDb.verifyPassword(user.passwordHash, data.password);
-            if (!isValid) {
-                throw new Error('Invalid credentials');
-            }
-
-            // Store auth state in localStorage
-            localStorage.setItem('currentUserId', user.id);
-
-            // Remove passwordHash from response
-            const { passwordHash: _, ...userWithoutPassword } = user;
-            return { data: { user: userWithoutPassword } };
+            return await response.json();
         },
 
         async logout() {
-            localStorage.removeItem('currentUserId');
-            return { data: { success: true } };
+            const response = await fetch(`${API_URL}/auth/logout`, {
+                method: 'POST',
+            });
+            if (!response.ok) {
+                throw new Error('Logout failed');
+            }
+            return await response.json();
         },
 
         async checkAuth() {
-            const userId = localStorage.getItem('currentUserId');
-            if (!userId) {
+            const response = await fetch(`${API_URL}/auth/me`, {
+                method: 'GET',
+            });
+            if (!response.ok) {
                 throw new Error('Not authenticated');
             }
-
-            const user = await clientDb.findUserById(userId);
-            if (!user) {
-                localStorage.removeItem('currentUserId');
-                throw new Error('User not found');
-            }
-
-            const { passwordHash: _, ...userWithoutPassword } = user;
-            return { data: { user: userWithoutPassword } };
+            return await response.json();
         },
     },
 
-    // Entry endpoints
-    entries: {
+    capsules: {
         async getAll() {
-            const userId = localStorage.getItem('currentUserId');
-            if (!userId) {
-                throw new Error('Not authenticated');
+            const response = await fetch(`${API_URL}/capsules`, {
+                method: 'GET',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch capsules');
             }
-
-            const entries = await clientDb.getEntries(userId);
-            return { data: entries };
+            const data = await response.json();
+            return { data };
         },
 
-        async create(entry: Omit<DiaryEntry, 'id' | 'createdAt' | 'updatedAt'>) {
-            const userId = localStorage.getItem('currentUserId');
-            if (!userId) {
-                throw new Error('Not authenticated');
+        async create(capsule: Omit<Capsule, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) {
+            const response = await fetch(`${API_URL}/capsules`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(capsule),
+            });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to create capsule');
             }
-
-            const newEntry: DiaryEntry = {
-                ...entry,
-                id: crypto.randomUUID(),
-                userId,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-            };
-
-            await clientDb.createEntry(newEntry);
-            return { data: newEntry };
+            const data = await response.json();
+            return { data };
         },
 
         async delete(id: string) {
-            await clientDb.deleteEntry(id);
+            const response = await fetch(`${API_URL}/capsules/${id}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete capsule');
+            }
             return { data: { success: true } };
         },
 
-        async update(id: string, updates: Partial<DiaryEntry>) {
-            const userId = localStorage.getItem('currentUserId');
-            if (!userId) {
-                throw new Error('Not authenticated');
-            }
-
-            const entries = await clientDb.getEntries(userId);
-            const existing = entries.find(e => e.id === id);
-            if (!existing) {
-                throw new Error('Entry not found');
-            }
-
-            const updated: DiaryEntry = {
-                ...existing,
-                ...updates,
-                updatedAt: new Date().toISOString(),
-            };
-
-            await clientDb.updateEntry(updated);
-            return { data: updated };
-        },
-    },
-
-    // Helper methods to match axios-like interface
-    async get(url: string) {
-        if (url === '/entries') {
-            return this.entries.getAll();
+        async update(_id: string, _updates: Partial<Capsule>) {
+            // Note: Backend update endpoint not fully implemented in this turn, 
+            // but following the pattern.
+            // Assuming PUT /capsules/:id or similar.
+            // For now, let's assume the backend doesn't have a specific update endpoint exposed yet
+            // other than maybe overwriting?
+            // The DB has `updateCapsule`.
+            // The router `capsules.ts` I wrote didn't have PUT/PATCH.
+            // I should probably add it if needed, but for now I'll leave it as a placeholder or
+            // if the UI uses it, I need to add it to backend.
+            // The Dashboard UI doesn't seem to have an "Edit" button, only "Create" and "Delete".
+            // So I might skip this or implement it if needed.
+            throw new Error("Update not implemented");
         }
-        throw new Error(`Unknown GET endpoint: ${url}`);
-    },
-
-    async post(url: string, data: unknown) {
-        if (url === '/auth/signup') {
-            return this.auth.signup(data as Parameters<typeof this.auth.signup>[0]);
-        }
-        if (url === '/auth/login') {
-            return this.auth.login(data as Parameters<typeof this.auth.login>[0]);
-        }
-        if (url === '/auth/logout') {
-            return this.auth.logout();
-        }
-        if (url === '/entries') {
-            return this.entries.create(data as Parameters<typeof this.entries.create>[0]);
-        }
-        throw new Error(`Unknown POST endpoint: ${url}`);
     },
 };
 

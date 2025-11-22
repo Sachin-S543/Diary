@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import { User } from '@secret-capsule/types';
+import { SafeUser } from '@secret-capsule/types';
 import api from '../api';
 
 interface AuthState {
-    user: User | null;
+    user: SafeUser | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (user: User) => void;
+    login: (user: SafeUser) => void;
     logout: () => void;
     checkAuth: () => Promise<void>;
 }

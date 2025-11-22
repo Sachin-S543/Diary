@@ -3,7 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { authRouter } from "./auth";
-import { entriesRouter } from "./entries";
+import { capsulesRouter } from "./capsules";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -24,7 +24,7 @@ app.get("/health", (_req: express.Request, res: express.Response) => {
 
 // Routes
 app.use("/auth", authRouter);
-app.use("/entries", entriesRouter);
+app.use("/capsules", capsulesRouter);
 
 // Start Server
 app.listen(PORT, () => {
