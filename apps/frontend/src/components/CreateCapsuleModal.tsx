@@ -59,7 +59,7 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="glass-panel w-full max-w-2xl p-8 relative animate-fade-in border-neon-purple/30 shadow-neon-purple/20">
+            <div className="glass-panel w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 relative animate-fade-in border-neon-purple/30 shadow-neon-purple/20 custom-scrollbar">
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"

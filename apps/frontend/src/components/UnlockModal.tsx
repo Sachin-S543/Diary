@@ -46,7 +46,7 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="glass-panel w-full max-w-md p-6 relative animate-fade-in border-neon-cyan/30 shadow-neon-cyan/20">
+            <div className="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-6 relative animate-fade-in border-neon-cyan/30 shadow-neon-cyan/20 custom-scrollbar">
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"

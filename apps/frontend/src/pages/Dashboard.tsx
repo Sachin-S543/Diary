@@ -98,7 +98,7 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen p-6 relative">
             {/* Background */}
-            <div className="absolute top-0 left-0 w-full h-full bg-[url('/grid.svg')] opacity-10 pointer-events-none"></div>
+            <div className="fixed top-0 left-0 w-full h-full bg-[url('/grid.svg')] opacity-10 pointer-events-none"></div>
 
             {/* Header */}
             <header className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">

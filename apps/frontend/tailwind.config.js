@@ -30,6 +30,7 @@ export default {
                 'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                 'float': 'float 6s ease-in-out infinite',
                 'glow': 'glow 2s ease-in-out infinite alternate',
+                'fade-in': 'fade-in 0.3s ease-out forwards',
             },
             keyframes: {
                 float: {
@@ -39,6 +40,10 @@ export default {
                 glow: {
                     'from': { boxShadow: '0 0 5px #b026ff, 0 0 10px #b026ff' },
                     'to': { boxShadow: '0 0 10px #b026ff, 0 0 20px #b026ff' },
+                },
+                'fade-in': {
+                    '0%': { opacity: '0', transform: 'scale(0.95)' },
+                    '100%': { opacity: '1', transform: 'scale(1)' },
                 }
             },
             backdropBlur: {

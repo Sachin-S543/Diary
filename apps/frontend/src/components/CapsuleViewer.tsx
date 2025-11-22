@@ -8,7 +8,7 @@ interface CapsuleViewerProps {
 
 export default function CapsuleViewer({ data, onClose, onDelete }: CapsuleViewerProps) {
     return (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
             <div className="glass-panel w-full max-w-4xl h-[80vh] flex flex-col relative border-neon-cyan/30 shadow-[0_0_50px_rgba(0,243,255,0.1)]">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-white/10">
