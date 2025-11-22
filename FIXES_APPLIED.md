@@ -152,3 +152,30 @@ The application is now:
 
 **Fixed:** November 22, 2025  
 **Status:** All Issues Resolved ✅
+
+---
+
+## 🛠️ UI & RESPONSIVENESS FIXES (LATEST)
+
+### 1. **Visual Glitches & Overlapping** ✅
+**Problem:**
+- Background image overlapping content or not covering full height on scroll
+- Modals (Create/Unlock) overflowing on small screens
+- Input fields potentially overflowing containers
+- Missing animations causing abrupt transitions
+
+**Solution:**
+- **Fixed Background:** Changed to `fixed` positioning to ensure it stays put during scroll
+- **Modal Overflow:** Added `max-h-[90vh]` and `overflow-y-auto` to modals for better mobile support
+- **Z-Index:** Updated `CapsuleViewer` to `z-50` to ensure it stays on top
+- **Animations:** Added missing `fade-in` animation to `tailwind.config.js`
+- **Input Widths:** Ensured inputs behave correctly in flex containers
+
+### 2. **Deployment** ✅
+- **Frontend:** Deployed to GitHub Pages
+- **Code:** Pushed to `main` branch
+
+**Status:**
+- ✅ UI is now stable and responsive
+- ✅ No more visual overlapping
+- ✅ Deployed successfully
