@@ -2,6 +2,12 @@
   "name": "secret-capsule-monorepo",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
+  "author": "Sachin-S543",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sachin-S543/Diary.git"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
