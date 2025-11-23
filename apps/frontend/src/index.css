@@ -39,115 +39,117 @@ body {
 }
 
 /* Custom Component Classes */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-}
+@layer components {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
 
-.neon-text {
-  background: linear-gradient(to right, #b026ff, #00f3ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+  .neon-text {
+    background: linear-gradient(to right, #b026ff, #00f3ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 
-.neon-border {
-  border: 1px solid transparent;
-  transition: border-color 0.3s ease;
-}
+  .neon-border {
+    border: 1px solid transparent;
+    transition: border-color 0.3s ease;
+  }
 
-.neon-border:hover {
-  border-color: rgba(176, 38, 255, 0.5);
-}
+  .neon-border:hover {
+    border-color: rgba(176, 38, 255, 0.5);
+  }
 
-.input-cyber {
-  width: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  color: white;
-  font-family: 'JetBrains Mono', monospace;
-  transition: all 0.3s ease;
-}
+  .input-cyber {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.3s ease;
+  }
 
-.input-cyber::placeholder {
-  color: rgba(255, 255, 255, 0.2);
-}
+  .input-cyber::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
 
-.input-cyber:focus {
-  outline: none;
-  border-color: rgba(0, 243, 255, 0.5);
-  box-shadow: 0 0 5px #00f3ff, 0 0 20px rgba(0, 243, 255, 0.5);
-}
+  .input-cyber:focus {
+    outline: none;
+    border-color: rgba(0, 243, 255, 0.5);
+    box-shadow: 0 0 5px #00f3ff, 0 0 20px rgba(0, 243, 255, 0.5);
+  }
 
-.btn-neon {
-  position: relative;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-family: 'Outfit', sans-serif;
-  font-weight: bold;
-  letter-spacing: 0.05em;
-  color: white;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
+  .btn-neon {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    color: white;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
 
-.btn-neon:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(176, 38, 255, 0.5);
-  box-shadow: 0 0 5px #b026ff, 0 0 20px rgba(176, 38, 255, 0.5);
-}
+  .btn-neon:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(176, 38, 255, 0.5);
+    box-shadow: 0 0 5px #b026ff, 0 0 20px rgba(176, 38, 255, 0.5);
+  }
 
-.btn-neon:active {
-  transform: scale(0.95);
-}
+  .btn-neon:active {
+    transform: scale(0.95);
+  }
 
-.btn-neon:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+  .btn-neon:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
-.btn-primary-neon {
-  background: rgba(176, 38, 255, 0.2);
-  border-color: rgba(176, 38, 255, 0.5);
-  color: #b026ff;
-}
+  .btn-primary-neon {
+    background: rgba(176, 38, 255, 0.2);
+    border-color: rgba(176, 38, 255, 0.5);
+    color: #b026ff;
+  }
 
-.btn-primary-neon:hover {
-  background: rgba(176, 38, 255, 0.3);
-  box-shadow: 0 0 5px #b026ff, 0 0 20px rgba(176, 38, 255, 0.5);
-}
+  .btn-primary-neon:hover {
+    background: rgba(176, 38, 255, 0.3);
+    box-shadow: 0 0 5px #b026ff, 0 0 20px rgba(176, 38, 255, 0.5);
+  }
 
-.capsule-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  padding: 1.5rem;
-  cursor: pointer;
-  transition: all 0.5s ease;
-  position: relative;
-  overflow: hidden;
-}
+  .capsule-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    position: relative;
+    overflow: hidden;
+  }
 
-.capsule-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 5px #00f3ff, 0 0 20px rgba(0, 243, 255, 0.5);
-}
+  .capsule-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 5px #00f3ff, 0 0 20px rgba(0, 243, 255, 0.5);
+  }
 
-/* Holographic Effect */
-.holographic {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  /* Holographic Effect */
+  .holographic {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
 }

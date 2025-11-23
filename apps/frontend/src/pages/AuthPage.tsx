@@ -82,7 +82,7 @@ export default function AuthPage() {
                             <User className="absolute left-3 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-neon-cyan transition-colors" />
                             <input
                                 type="text"
-                                className="input-cyber pl-12"
+                                className="input-cyber pl-12 pr-4"
                                 placeholder="Username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
@@ -95,7 +95,7 @@ export default function AuthPage() {
                         <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-neon-cyan transition-colors" />
                         <input
                             type="text"
-                            className="input-cyber pl-12"
+                            className="input-cyber pl-12 pr-4"
                             placeholder={isLogin ? "Email or Username" : "Email"}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -108,7 +108,7 @@ export default function AuthPage() {
                             <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-neon-cyan transition-colors" />
                             <input
                                 type="password"
-                                className="input-cyber pl-12"
+                                className="input-cyber pl-12 pr-4"
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}

@@ -2,6 +2,10 @@ node_modules
 dist
 build
 coverage
+node_modules
+dist
+build
+coverage
 .env
 .DS_Store
 *.log
@@ -12,3 +16,6 @@ yarn-error.log*
 .vscode
 *.sqlite
 *.sqlite-journal
+
+FINAL_TECHNICAL_REPORT.md
+FINAL_TECHNICAL_REPORT.pdf

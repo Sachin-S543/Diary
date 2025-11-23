@@ -149,7 +149,7 @@ export default function Dashboard() {
                         type="text"
                         placeholder="Search (Locked)"
                         disabled
-                        className="input-cyber pl-10 opacity-50 cursor-not-allowed"
+                        className="input-cyber pl-10 pr-4 opacity-50 cursor-not-allowed"
                         title="Search is only available for unlocked content (Not implemented in this version)"
                     />
                 </div>

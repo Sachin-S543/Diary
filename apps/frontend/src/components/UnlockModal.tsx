@@ -65,7 +65,7 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
                 <form onSubmit={handleUnlock} className="space-y-4">
                     <input
                         type="password"
-                        className="input-cyber text-center text-lg tracking-widest"
+                        className="input-cyber text-center text-lg tracking-widest px-4"
                         placeholder="••••••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}

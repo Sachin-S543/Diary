@@ -76,7 +76,7 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
                     <div className="space-y-4">
                         <input
                             type="text"
-                            className="input-cyber text-xl font-bold"
+                            className="input-cyber text-xl font-bold px-4"
                             placeholder="Capsule Title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
@@ -84,7 +84,7 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
                         />
 
                         <textarea
-                            className="input-cyber min-h-[200px] resize-none"
+                            className="input-cyber min-h-[200px] resize-none px-4 py-3"
                             placeholder="Write your secure content here..."
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
@@ -97,7 +97,7 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <input
                                 type="password"
-                                className="input-cyber"
+                                className="input-cyber px-4"
                                 placeholder="Capsule Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -105,7 +105,7 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
                             />
                             <input
                                 type="password"
-                                className="input-cyber"
+                                className="input-cyber px-4"
                                 placeholder="Confirm Password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
