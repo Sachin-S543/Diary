@@ -7,7 +7,7 @@ Object.assign(global, { TextDecoder, TextEncoder });
 
 Object.defineProperty(global, 'crypto', {
     value: {
-        getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
+        getRandomValues: (arr: Uint8Array) => crypto.randomBytes(arr.length),
         subtle: crypto.webcrypto.subtle,
     },
 });
@@ -15,7 +15,7 @@ Object.defineProperty(global, 'crypto', {
 if (typeof window !== 'undefined') {
     Object.defineProperty(window, 'crypto', {
         value: {
-            getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
+            getRandomValues: (arr: Uint8Array) => crypto.randomBytes(arr.length),
             subtle: crypto.webcrypto.subtle,
         },
     });

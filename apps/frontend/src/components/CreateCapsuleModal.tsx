@@ -49,9 +49,10 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
                 });
 
                 onSuccess();
-            } catch (err: any) {
+            } catch (err) {
                 console.error(err);
-                setError(err.message || 'Failed to create capsule');
+                const message = err instanceof Error ? err.message : 'Failed to create capsule';
+                setError(message);
             } finally {
                 setLoading(false);
             }
