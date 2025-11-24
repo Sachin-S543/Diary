@@ -15,6 +15,7 @@ export default function Dashboard() {
     const [selectedCapsule, setSelectedCapsule] = useState<Capsule | null>(null);
     const [viewData, setViewData] = useState<{ title: string; content: string } | null>(null);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -31,6 +32,21 @@ export default function Dashboard() {
             setLoading(false);
         }
     };
+
+    // Filter capsules based on search query (by date)
+    const filteredCapsules = capsules.filter(capsule => {
+        if (!searchQuery.trim()) return true;
+
+        const query = searchQuery.toLowerCase();
+        const date = new Date(capsule.createdAt).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        }).toLowerCase();
+
+        // Search by date or capsule ID
+        return date.includes(query) || capsule.id.toString().includes(query);
+    });
 
     const handleUnlock = (data: { title: string; content: string }) => {
         setViewData(data);
@@ -144,13 +160,14 @@ export default function Dashboard() {
             {/* Controls */}
             <div className="flex justify-between items-center mb-8">
                 <div className="relative group w-64">
-                    <Search className="absolute left-3 top-3 w-4 h-4 text-gray-500 group-focus-within:text-neon-cyan" />
+                    <Search className="absolute left-3 top-3 w-4 h-4 text-gray-500 group-focus-within:text-neon-cyan transition-colors" />
                     <input
                         type="text"
-                        placeholder="Search (Locked)"
-                        disabled
-                        className="input-cyber pl-10 pr-4 opacity-50 cursor-not-allowed"
-                        title="Search is only available for unlocked content (Not implemented in this version)"
+                        placeholder="Search by date or ID..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="input-cyber pl-10 pr-4"
+                        title="Search capsules by creation date or ID"
                     />
                 </div>
                 <button
@@ -167,13 +184,18 @@ export default function Dashboard() {
                 <div className="text-center text-gray-500 animate-pulse">Scanning storage...</div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {capsules.map(capsule => (
+                    {filteredCapsules.map(capsule => (
                         <CapsuleCard
                             key={capsule.id}
                             capsule={capsule}
                             onClick={() => setSelectedCapsule(capsule)}
                         />
                     ))}
+                    {filteredCapsules.length === 0 && capsules.length > 0 && (
+                        <div className="col-span-full text-center py-20 text-gray-500 border-2 border-dashed border-white/5 rounded-xl">
+                            No capsules match your search. Try a different query.
+                        </div>
+                    )}
                     {capsules.length === 0 && (
                         <div className="col-span-full text-center py-20 text-gray-500 border-2 border-dashed border-white/5 rounded-xl">
                             No capsules found. Initialize a new secure storage unit.
