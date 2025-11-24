@@ -1,5 +1,5 @@
 # Secret Capsule 💊
-Check out the live version running on GitHub Pages: **[Launch Secret Capsule](https://sachin-s543.github.io/Diary/)**
+Check out the live version running on GitHub Pages: **[Launch Secret Capsule][def]**
 
 > **Note:** The demo runs in "Client-Only Mode". All data is stored securely in your browser's IndexedDB and is never sent to a server.
 
@@ -72,3 +72,6 @@ The UI follows a "Futuristic Glass" aesthetic. See [DESIGN.md](./DESIGN.md) for 
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+
+
+[def]: https://sachin-s543.github.io/Diary/
