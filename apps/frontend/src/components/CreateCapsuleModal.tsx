@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, AlertCircle, ShieldCheck } from 'lucide-react';
+import { X, AlertCircle, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { generateSalt, deriveCapsuleKeys, encryptCapsule } from '@secret-capsule/crypto-utils';
 import api from '../api';
 
@@ -13,6 +13,7 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
     const [content, setContent] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -95,22 +96,34 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
                     <div className="bg-black/40 p-6 rounded-xl border border-white/10 space-y-4">
                         <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">Encryption Lock</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input
-                                type="password"
-                                className="input-cyber px-4"
-                                placeholder="Capsule Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="password"
-                                className="input-cyber px-4"
-                                placeholder="Confirm Password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className="input-cyber px-4 w-full pr-10"
+                                    placeholder="Capsule Password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-neon-cyan transition-colors"
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className="input-cyber px-4 w-full pr-10"
+                                    placeholder="Confirm Password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
                         </div>
                         <p className="text-xs text-gray-500 flex items-center gap-1">
                             <AlertCircle className="w-3 h-3" />

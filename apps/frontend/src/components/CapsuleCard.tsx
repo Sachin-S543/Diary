@@ -31,14 +31,19 @@ export default function CapsuleCard({ capsule, onClick }: CapsuleCardProps) {
                 </span>
             </div>
 
-            <div className="mt-4 flex justify-between items-center text-sm text-gray-400">
-                <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>{date}</span>
+            <div className="mt-4 flex flex-col gap-2 text-sm text-gray-400">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{date}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 font-mono text-xs">
+                        <HardDrive className="w-3.5 h-3.5" />
+                        <span>{sizeStr}</span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-1.5 font-mono text-xs">
-                    <HardDrive className="w-3.5 h-3.5" />
-                    <span>{sizeStr}</span>
+                <div className="text-[10px] font-mono text-gray-600 truncate w-full text-center border-t border-white/5 pt-2 mt-1">
+                    ID: {capsule.id}
                 </div>
             </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Unlock, AlertCircle } from 'lucide-react';
+import { X, Unlock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { Capsule } from '@secret-capsule/types';
 import { deriveCapsuleKeys, decryptCapsule, CapsuleKeys } from '@secret-capsule/crypto-utils';
 
@@ -11,6 +11,7 @@ interface UnlockModalProps {
 
 export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalProps) {
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -63,14 +64,24 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
                 </div>
 
                 <form onSubmit={handleUnlock} className="space-y-4">
-                    <input
-                        type="password"
-                        className="input-cyber text-center text-lg tracking-widest px-4"
-                        placeholder="••••••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        autoFocus
-                    />
+                    <div className="relative">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            className="input-cyber text-center text-lg tracking-widest px-4 w-full pr-10"
+                            placeholder={showPassword ? "password" : "••••••••••••"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            autoFocus
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-neon-cyan transition-colors"
+                            tabIndex={-1}
+                        >
+                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                    </div>
 
                     {error && (
                         <div className="flex items-center gap-2 text-red-400 text-sm justify-center bg-red-500/10 p-2 rounded">
