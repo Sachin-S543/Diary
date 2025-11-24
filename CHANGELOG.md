@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-11-24
+
+### ✨ Added
+- **Search Functionality**: Capsules can now be filtered by creation date or ID
+  - Real-time search as you type
+  - Searches through date strings (e.g., "Nov 24", "2025")
+  - Searches through capsule IDs
+  - Shows helpful message when no results match
+
+### 🔧 Fixed
+- Enabled the previously disabled search input field
+- Search now works without requiring decryption (searches metadata only)
+
 ## [1.0.0] - 2025-11-24
 
 ### 🎉 Initial Release
