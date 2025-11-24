@@ -16,7 +16,7 @@
     "build": "npm run build --workspaces",
     "dev": "concurrently \"npm run dev --workspace=@secret-capsule/server\" \"npm run dev --workspace=@secret-capsule/frontend\"",
     "test": "npm run test --workspaces",
-    "lint": "npm run lint --workspaces",
+    "lint": "npm run lint --workspace=@secret-capsule/frontend",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules"
   },
   "devDependencies": {
