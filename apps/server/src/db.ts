@@ -31,9 +31,17 @@ sql.exec(`
         size INTEGER,
         createdAt TEXT,
         updatedAt TEXT,
+        unlockAt TEXT,
         FOREIGN KEY(userId) REFERENCES users(id)
     );
 `);
+
+// Migration for existing databases
+try {
+    sql.exec('ALTER TABLE capsules ADD COLUMN unlockAt TEXT');
+} catch (e) {
+    // Column likely already exists
+}
 
 class SQLiteDB {
     async findUserByEmail(email: string): Promise<User | undefined> {
@@ -66,8 +74,8 @@ class SQLiteDB {
 
     async createCapsule(capsule: Capsule): Promise<void> {
         const stmt = sql.prepare(`
-            INSERT INTO capsules (id, userId, encryptedTitle, encryptedContent, iv, salt, hmac, size, createdAt, updatedAt)
-            VALUES (@id, @userId, @encryptedTitle, @encryptedContent, @iv, @salt, @hmac, @size, @createdAt, @updatedAt)
+            INSERT INTO capsules (id, userId, encryptedTitle, encryptedContent, iv, salt, hmac, size, createdAt, updatedAt, unlockAt)
+            VALUES (@id, @userId, @encryptedTitle, @encryptedContent, @iv, @salt, @hmac, @size, @createdAt, @updatedAt, @unlockAt)
         `);
         stmt.run(capsule);
     }
@@ -86,7 +94,8 @@ class SQLiteDB {
                 salt = @salt,
                 hmac = @hmac,
                 size = @size,
-                updatedAt = @updatedAt
+                updatedAt = @updatedAt,
+                unlockAt = @unlockAt
             WHERE id = @id
         `);
         stmt.run(capsule);

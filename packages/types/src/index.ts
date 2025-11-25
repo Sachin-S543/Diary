@@ -19,6 +19,7 @@ export interface Capsule {
     hmac: string; // Base64 (HMAC-SHA256)
     createdAt: string;
     updatedAt: string;
+    unlockAt?: string; // ISO Date string for time-lock
     size: number; // Size in bytes (approx)
 }
 

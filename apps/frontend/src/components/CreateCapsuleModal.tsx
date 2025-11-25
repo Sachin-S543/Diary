@@ -14,6 +14,7 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [unlockDate, setUnlockDate] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -45,7 +46,8 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
                     iv: encrypted.iv,
                     salt: salt,
                     hmac: encrypted.hmac,
-                    size: payload.length
+                    size: payload.length,
+                    unlockAt: unlockDate ? new Date(unlockDate).toISOString() : undefined
                 });
 
                 onSuccess();
@@ -92,6 +94,20 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
                             onChange={(e) => setContent(e.target.value)}
                             required
                         />
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-400 uppercase tracking-wider">Time Lock (Optional)</label>
+                            <input
+                                type="datetime-local"
+                                className="input-cyber px-4 w-full"
+                                value={unlockDate}
+                                onChange={(e) => setUnlockDate(e.target.value)}
+                                min={new Date().toISOString().slice(0, 16)}
+                            />
+                            <p className="text-xs text-gray-500">
+                                If set, this capsule cannot be opened until the specified date.
+                            </p>
+                        </div>
                     </div>
 
                     <div className="bg-black/40 p-6 rounded-xl border border-white/10 space-y-4">

@@ -92,7 +92,8 @@ export default function Dashboard() {
                                 iv: c.iv,
                                 salt: c.salt,
                                 hmac: c.hmac,
-                                size: c.size || 0
+                                size: c.size || 0,
+                                unlockAt: c.unlockAt
                             });
                             count++;
                         }
@@ -188,7 +189,14 @@ export default function Dashboard() {
                         <CapsuleCard
                             key={capsule.id}
                             capsule={capsule}
-                            onClick={() => setSelectedCapsule(capsule)}
+                            onClick={() => {
+                                if (capsule.unlockAt && new Date(capsule.unlockAt) > new Date()) {
+                                    const date = new Date(capsule.unlockAt).toLocaleString();
+                                    alert(`This capsule is time-locked until ${date}. You cannot open it yet.`);
+                                    return;
+                                }
+                                setSelectedCapsule(capsule);
+                            }}
                         />
                     ))}
                     {filteredCapsules.length === 0 && capsules.length > 0 && (
