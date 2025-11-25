@@ -32,6 +32,7 @@ sql.exec(`
         createdAt TEXT,
         updatedAt TEXT,
         unlockAt TEXT,
+        aura TEXT,
         FOREIGN KEY(userId) REFERENCES users(id)
     );
 `);
@@ -39,6 +40,12 @@ sql.exec(`
 // Migration for existing databases
 try {
     sql.exec('ALTER TABLE capsules ADD COLUMN unlockAt TEXT');
+} catch (e) {
+    // Column likely already exists
+}
+
+try {
+    sql.exec('ALTER TABLE capsules ADD COLUMN aura TEXT');
 } catch (e) {
     // Column likely already exists
 }
@@ -74,8 +81,8 @@ class SQLiteDB {
 
     async createCapsule(capsule: Capsule): Promise<void> {
         const stmt = sql.prepare(`
-            INSERT INTO capsules (id, userId, encryptedTitle, encryptedContent, iv, salt, hmac, size, createdAt, updatedAt, unlockAt)
-            VALUES (@id, @userId, @encryptedTitle, @encryptedContent, @iv, @salt, @hmac, @size, @createdAt, @updatedAt, @unlockAt)
+            INSERT INTO capsules (id, userId, encryptedTitle, encryptedContent, iv, salt, hmac, size, createdAt, updatedAt, unlockAt, aura)
+            VALUES (@id, @userId, @encryptedTitle, @encryptedContent, @iv, @salt, @hmac, @size, @createdAt, @updatedAt, @unlockAt, @aura)
         `);
         stmt.run(capsule);
     }
@@ -95,7 +102,8 @@ class SQLiteDB {
                 hmac = @hmac,
                 size = @size,
                 updatedAt = @updatedAt,
-                unlockAt = @unlockAt
+                unlockAt = @unlockAt,
+                aura = @aura
             WHERE id = @id
         `);
         stmt.run(capsule);

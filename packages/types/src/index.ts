@@ -20,6 +20,7 @@ export interface Capsule {
     createdAt: string;
     updatedAt: string;
     unlockAt?: string; // ISO Date string for time-lock
+    aura?: string; // Color theme: 'purple' | 'cyan' | 'gold' | 'red' | 'green'
     size: number; // Size in bytes (approx)
 }
 

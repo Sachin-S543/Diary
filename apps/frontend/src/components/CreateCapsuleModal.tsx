@@ -15,6 +15,7 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [unlockDate, setUnlockDate] = useState('');
+    const [aura, setAura] = useState('purple');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -47,7 +48,8 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
                     salt: salt,
                     hmac: encrypted.hmac,
                     size: payload.length,
-                    unlockAt: unlockDate ? new Date(unlockDate).toISOString() : undefined
+                    unlockAt: unlockDate ? new Date(unlockDate).toISOString() : undefined,
+                    aura
                 });
 
                 onSuccess();
@@ -107,6 +109,30 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
                             <p className="text-xs text-gray-500">
                                 If set, this capsule cannot be opened until the specified date.
                             </p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-400 uppercase tracking-wider">Aura (Theme)</label>
+                            <div className="flex gap-3">
+                                {['purple', 'cyan', 'gold', 'red', 'green'].map((c) => (
+                                    <button
+                                        key={c}
+                                        type="button"
+                                        onClick={() => setAura(c)}
+                                        className={`w-8 h-8 rounded-full border-2 transition-all ${aura === c ? 'border-white scale-110 shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'border-transparent opacity-50 hover:opacity-100'
+                                            }`}
+                                        style={{
+                                            backgroundColor:
+                                                c === 'purple' ? '#b026ff' :
+                                                    c === 'cyan' ? '#00f3ff' :
+                                                        c === 'gold' ? '#ffd700' :
+                                                            c === 'red' ? '#ff0055' :
+                                                                '#00ff9d'
+                                        }}
+                                        title={c.charAt(0).toUpperCase() + c.slice(1)}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
 

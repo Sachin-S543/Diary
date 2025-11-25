@@ -93,7 +93,8 @@ export default function Dashboard() {
                                 salt: c.salt,
                                 hmac: c.hmac,
                                 size: c.size || 0,
-                                unlockAt: c.unlockAt
+                                unlockAt: c.unlockAt,
+                                aura: c.aura
                             });
                             count++;
                         }

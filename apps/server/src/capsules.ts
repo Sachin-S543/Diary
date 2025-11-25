@@ -36,6 +36,7 @@ const CreateCapsuleSchema = z.object({
     hmac: z.string(),
     size: z.number(),
     unlockAt: z.string().optional(),
+    aura: z.string().optional(),
 });
 
 router.get("/", async (req: AuthRequest, res: Response) => {

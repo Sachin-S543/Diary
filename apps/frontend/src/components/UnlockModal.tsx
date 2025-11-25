@@ -45,9 +45,20 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
         }, 100);
     };
 
+    // Aura Colors
+    const aura = capsule.aura || 'purple';
+    const auraColors: Record<string, { border: string, text: string, bg: string, shadow: string, btn: string }> = {
+        purple: { border: 'border-[#b026ff]/30', text: 'text-[#b026ff]', bg: 'bg-[#b026ff]/10', shadow: 'shadow-[#b026ff]/20', btn: 'bg-[#b026ff]/10 border-[#b026ff]/50 text-[#b026ff] hover:bg-[#b026ff]/20' },
+        cyan: { border: 'border-[#00f3ff]/30', text: 'text-[#00f3ff]', bg: 'bg-[#00f3ff]/10', shadow: 'shadow-[#00f3ff]/20', btn: 'bg-[#00f3ff]/10 border-[#00f3ff]/50 text-[#00f3ff] hover:bg-[#00f3ff]/20' },
+        gold: { border: 'border-[#ffd700]/30', text: 'text-[#ffd700]', bg: 'bg-[#ffd700]/10', shadow: 'shadow-[#ffd700]/20', btn: 'bg-[#ffd700]/10 border-[#ffd700]/50 text-[#ffd700] hover:bg-[#ffd700]/20' },
+        red: { border: 'border-[#ff0055]/30', text: 'text-[#ff0055]', bg: 'bg-[#ff0055]/10', shadow: 'shadow-[#ff0055]/20', btn: 'bg-[#ff0055]/10 border-[#ff0055]/50 text-[#ff0055] hover:bg-[#ff0055]/20' },
+        green: { border: 'border-[#00ff9d]/30', text: 'text-[#00ff9d]', bg: 'bg-[#00ff9d]/10', shadow: 'shadow-[#00ff9d]/20', btn: 'bg-[#00ff9d]/10 border-[#00ff9d]/50 text-[#00ff9d] hover:bg-[#00ff9d]/20' },
+    };
+    const theme = auraColors[aura] || auraColors.cyan; // Default to cyan for unlock modal if no aura
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-6 relative animate-fade-in border-neon-cyan/30 shadow-neon-cyan/20 custom-scrollbar">
+            <div className={`glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-6 relative animate-fade-in ${theme.border} ${theme.shadow} custom-scrollbar`}>
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
@@ -56,8 +67,8 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
                 </button>
 
                 <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-neon-cyan/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-neon-cyan/30">
-                        <Unlock className="w-8 h-8 text-neon-cyan" />
+                    <div className={`w-16 h-16 ${theme.bg} rounded-full flex items-center justify-center mx-auto mb-4 border ${theme.border}`}>
+                        <Unlock className={`w-8 h-8 ${theme.text}`} />
                     </div>
                     <h2 className="text-2xl font-display font-bold text-white">Unlock Capsule</h2>
                     <p className="text-gray-400 text-sm mt-1">Enter the unique password for this capsule</p>
@@ -76,7 +87,7 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-neon-cyan transition-colors"
+                            className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:${theme.text} transition-colors`}
                             tabIndex={-1}
                         >
                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -93,7 +104,7 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
                     <button
                         type="submit"
                         disabled={loading || !password}
-                        className="w-full btn-neon bg-neon-cyan/10 border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/20"
+                        className={`w-full btn-neon ${theme.btn}`}
                     >
                         {loading ? 'DECRYPTING...' : 'ACCESS CONTENT'}
                     </button>
