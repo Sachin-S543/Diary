@@ -7,35 +7,39 @@ const dbPath = process.env.DATABASE_PATH
     : path.resolve(__dirname, '../database.sqlite');
 const sql = new Database(dbPath);
 
-// Initialize Tables
-sql.exec(`
-    DROP TABLE IF EXISTS entries; -- Legacy
-    
-    CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
-        username TEXT UNIQUE,
-        email TEXT UNIQUE,
-        passwordHash TEXT,
-        salt TEXT, -- User salt for client-side key derivation
-        createdAt TEXT
-    );
+console.log(`Database path: ${dbPath}`);
 
-    CREATE TABLE IF NOT EXISTS capsules (
-        id TEXT PRIMARY KEY,
-        userId TEXT,
-        encryptedTitle TEXT,
-        encryptedContent TEXT,
-        iv TEXT,
-        salt TEXT,
-        hmac TEXT,
-        size INTEGER,
-        createdAt TEXT,
-        updatedAt TEXT,
-        unlockAt TEXT,
-        aura TEXT,
-        FOREIGN KEY(userId) REFERENCES users(id)
-    );
-`);
+try {
+    sql.exec(`
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            username TEXT UNIQUE,
+            email TEXT UNIQUE,
+            passwordHash TEXT,
+            salt TEXT,
+            createdAt TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS capsules (
+            id TEXT PRIMARY KEY,
+            userId TEXT,
+            encryptedTitle TEXT,
+            encryptedContent TEXT,
+            iv TEXT,
+            salt TEXT,
+            hmac TEXT,
+            size INTEGER,
+            createdAt TEXT,
+            updatedAt TEXT,
+            unlockAt TEXT,
+            aura TEXT,
+            FOREIGN KEY(userId) REFERENCES users(id)
+        );
+    `);
+    console.log("Database tables initialized successfully.");
+} catch (err) {
+    console.error("Failed to initialize database tables:", err);
+}
 
 // Migration for existing databases
 try {
@@ -84,7 +88,11 @@ class SQLiteDB {
             INSERT INTO capsules (id, userId, encryptedTitle, encryptedContent, iv, salt, hmac, size, createdAt, updatedAt, unlockAt, aura)
             VALUES (@id, @userId, @encryptedTitle, @encryptedContent, @iv, @salt, @hmac, @size, @createdAt, @updatedAt, @unlockAt, @aura)
         `);
-        stmt.run(capsule);
+        stmt.run({
+            ...capsule,
+            unlockAt: capsule.unlockAt || null,
+            aura: capsule.aura || null
+        });
     }
 
     async deleteCapsule(id: string): Promise<void> {
@@ -106,7 +114,11 @@ class SQLiteDB {
                 aura = @aura
             WHERE id = @id
         `);
-        stmt.run(capsule);
+        stmt.run({
+            ...capsule,
+            unlockAt: capsule.unlockAt || null,
+            aura: capsule.aura || null
+        });
     }
 }
 

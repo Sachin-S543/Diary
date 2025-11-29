@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../api';
-import { Lock, User, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { Lock, User, Mail, ArrowRight, AlertCircle, Shield } from 'lucide-react';
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);
@@ -37,7 +37,6 @@ export default function AuthPage() {
                 login(user);
                 navigate('/dashboard');
             } else {
-                // No password strength requirement - user can choose any password
                 const { user } = await api.auth.signup({ email, username, password });
                 login(user);
                 navigate('/dashboard');
@@ -51,39 +50,41 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Background effects */}
-            <div className="absolute -top-20 -left-20 w-96 h-96 bg-neon-purple/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-neon-cyan/20 rounded-full blur-[100px] animate-pulse-slow delay-1000"></div>
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-50">
+            {/* Mesh Gradient Background */}
+            <div className="absolute inset-0 bg-[radial-gradient(at_0%_0%,rgba(99,102,241,0.15)_0px,transparent_50%),radial-gradient(at_100%_0%,rgba(236,72,153,0.15)_0px,transparent_50%),radial-gradient(at_100%_100%,rgba(6,182,212,0.15)_0px,transparent_50%),radial-gradient(at_0%_100%,rgba(139,92,246,0.15)_0px,transparent_50%)]"></div>
 
-            <div className="glass-panel w-full max-w-md p-8 relative z-10 border-t border-l border-white/10 shadow-neon-purple/20">
+            <div className="glass-panel w-full max-w-md p-8 relative z-10 animate-scale-in">
                 <div className="text-center mb-8">
-                    <h1 className="text-4xl font-display font-bold neon-text mb-2 tracking-wider">SECRET CAPSULE</h1>
-                    <p className="text-gray-400 text-sm uppercase tracking-widest">Secure Digital Memory Storage</p>
+                    <div className="w-16 h-16 bg-white rounded-2xl shadow-glass-md flex items-center justify-center mx-auto mb-6 transform rotate-3 hover:rotate-6 transition-transform duration-500">
+                        <Shield className="w-8 h-8 text-primary-vibrant" />
+                    </div>
+                    <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Secret Capsule</h1>
+                    <p className="text-slate-500 text-sm">Secure Digital Memory Storage</p>
                 </div>
 
-                <div className="flex mb-8 bg-black/40 rounded-lg p-1 border border-white/5">
+                <div className="flex mb-8 bg-slate-100/50 p-1 rounded-xl">
                     <button
-                        className={`flex-1 py-2 rounded-md transition-all font-medium ${isLogin ? 'bg-neon-purple/20 text-neon-purple shadow-[0_0_10px_rgba(176,38,255,0.3)]' : 'text-gray-400 hover:text-white'}`}
+                        className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         onClick={() => { setIsLogin(true); setError(''); }}
                     >
-                        ACCESS
+                        Sign In
                     </button>
                     <button
-                        className={`flex-1 py-2 rounded-md transition-all font-medium ${!isLogin ? 'bg-neon-cyan/20 text-neon-cyan shadow-[0_0_10px_rgba(0,243,255,0.3)]' : 'text-gray-400 hover:text-white'}`}
+                        className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${!isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         onClick={() => { setIsLogin(false); setError(''); }}
                     >
-                        INITIALIZE
+                        Create Account
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     {!isLogin && (
                         <div className="relative group">
-                            <User className="absolute left-3 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-neon-cyan transition-colors" />
+                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary-vibrant transition-colors" />
                             <input
                                 type="text"
-                                className="input-cyber pl-12 pr-4"
+                                className="input-premium pl-12"
                                 placeholder="Username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
@@ -93,10 +94,10 @@ export default function AuthPage() {
                     )}
 
                     <div className="relative group">
-                        <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-neon-cyan transition-colors" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary-vibrant transition-colors" />
                         <input
                             type="text"
-                            className="input-cyber pl-12 pr-4"
+                            className="input-premium pl-12"
                             placeholder={isLogin ? "Email or Username" : "Email"}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -106,10 +107,10 @@ export default function AuthPage() {
 
                     <div className="space-y-2">
                         <div className="relative group">
-                            <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-neon-cyan transition-colors" />
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary-vibrant transition-colors" />
                             <input
                                 type="password"
-                                className="input-cyber pl-12 pr-4"
+                                className="input-premium pl-12"
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -118,13 +119,13 @@ export default function AuthPage() {
                         </div>
 
                         {!isLogin && password && (
-                            <div className="flex gap-1 h-1 mt-2">
+                            <div className="flex gap-1 h-1.5 mt-2 px-1">
                                 {[1, 2, 3, 4, 5].map((i) => (
                                     <div
                                         key={i}
                                         className={`flex-1 rounded-full transition-all duration-300 ${strength >= i
-                                            ? (strength < 3 ? 'bg-red-500' : strength < 4 ? 'bg-yellow-500' : 'bg-green-500')
-                                            : 'bg-white/10'
+                                            ? (strength < 3 ? 'bg-rose-400' : strength < 4 ? 'bg-amber-400' : 'bg-emerald-400')
+                                            : 'bg-slate-200'
                                             }`}
                                     />
                                 ))}
@@ -133,22 +134,22 @@ export default function AuthPage() {
                     </div>
 
                     {error && (
-                        <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                            <AlertCircle className="w-4 h-4" />
+                        <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-4 rounded-xl border border-red-100">
+                            <AlertCircle className="w-4 h-4 flex-shrink-0" />
                             {error}
                         </div>
                     )}
 
                     <button
                         type="submit"
-                        className="w-full btn-neon flex items-center justify-center gap-2 group"
+                        className="w-full btn-premium btn-primary justify-center group"
                         disabled={loading}
                     >
                         {loading ? (
-                            <span className="animate-pulse">PROCESSING...</span>
+                            <span className="animate-pulse">Processing...</span>
                         ) : (
                             <>
-                                {isLogin ? 'DECRYPT SESSION' : 'ESTABLISH IDENTITY'}
+                                {isLogin ? 'Sign In' : 'Get Started'}
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </>
                         )}

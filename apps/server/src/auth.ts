@@ -55,8 +55,11 @@ router.post("/signup", async (req: Request, res: Response) => {
         const { passwordHash: _, ...safeUser } = newUser;
         res.status(201).json({ user: safeUser, token });
     } catch (error) {
-        console.error(error);
-        res.status(400).json({ message: "Invalid input", error });
+        console.error("Signup Error:", error);
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ message: "Invalid input", errors: error.errors });
+        }
+        res.status(400).json({ message: "Invalid input", error: String(error) });
     }
 });
 

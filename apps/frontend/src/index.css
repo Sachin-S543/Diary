@@ -3,26 +3,30 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  background-color: #030014;
-  color: white;
+  background-color: #f8fafc;
+  color: #0f172a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   overflow-x: hidden;
   font-family: 'Inter', sans-serif;
-  background:
-    radial-gradient(circle at 15% 50%, rgba(176, 38, 255, 0.08), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.08), transparent 25%);
+
+  /* Mesh Gradient Background */
+  background-image:
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
   background-attachment: fixed;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -30,126 +34,135 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  background: rgba(15, 23, 42, 0.1);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(15, 23, 42, 0.2);
 }
 
-/* Custom Component Classes */
 @layer components {
+
+  /* Premium Glass Card */
   .glass-panel {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    @apply bg-white/70 backdrop-blur-xl border border-white/50 shadow-glass-md rounded-2xl transition-all duration-300;
   }
 
-  .neon-text {
-    background: linear-gradient(to right, #b026ff, #00f3ff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .glass-panel:hover {
+    @apply shadow-glass-lg bg-white/80;
   }
 
-  .neon-border {
-    border: 1px solid transparent;
-    transition: border-color 0.3s ease;
+  /* Typography */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-sans tracking-tight text-slate-900;
   }
 
-  .neon-border:hover {
-    border-color: rgba(176, 38, 255, 0.5);
+  /* Inputs */
+  .input-premium {
+    @apply w-full bg-white/50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 font-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-soft/50 focus:border-primary-soft focus:bg-white;
   }
 
-  .input-cyber {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.5rem;
-    padding: 0.75rem;
-    color: white;
-    font-family: 'JetBrains Mono', monospace;
-    transition: all 0.3s ease;
+  /* Buttons */
+  .btn-premium {
+    @apply relative overflow-hidden px-6 py-3 rounded-xl font-sans font-semibold tracking-wide transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2;
   }
 
-  .input-cyber::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+  .btn-primary {
+    @apply bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 hover:-translate-y-0.5;
+    background-image: linear-gradient(to bottom right, #1e293b, #0f172a);
   }
 
-  .input-cyber:focus {
-    outline: none;
-    border-color: rgba(0, 243, 255, 0.5);
-    box-shadow: 0 0 5px #00f3ff, 0 0 20px rgba(0, 243, 255, 0.5);
+  .btn-secondary {
+    @apply bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300;
   }
 
-  .btn-neon {
-    position: relative;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-family: 'Outfit', sans-serif;
-    font-weight: bold;
-    letter-spacing: 0.05em;
-    color: white;
-    transition: all 0.3s ease;
-    cursor: pointer;
+  .btn-ghost {
+    @apply text-slate-500 hover:text-slate-900 hover:bg-slate-100/50;
   }
 
-  .btn-neon:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(176, 38, 255, 0.5);
-    box-shadow: 0 0 5px #b026ff, 0 0 20px rgba(176, 38, 255, 0.5);
+  /* Capsule Card */
+  .capsule-card {
+    @apply relative overflow-hidden bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl p-6 shadow-glass-sm cursor-pointer transition-all duration-500 hover:shadow-glass-md hover:scale-[1.02] hover:bg-white/80;
   }
 
-  .btn-neon:active {
+  /* Aura Badges */
+  .badge-aura {
+    @apply px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border;
+  }
+}
+
+/* Utilities */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-vibrant to-secondary;
+}
+
+/* Animations */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes scale-in {
+  0% {
+    opacity: 0;
     transform: scale(0.95);
   }
 
-  .btn-neon:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
   }
 
-  .btn-primary-neon {
-    background: rgba(176, 38, 255, 0.2);
-    border-color: rgba(176, 38, 255, 0.5);
-    color: #b026ff;
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
-  .btn-primary-neon:hover {
-    background: rgba(176, 38, 255, 0.3);
-    box-shadow: 0 0 5px #b026ff, 0 0 20px rgba(176, 38, 255, 0.5);
-  }
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
 
-  .capsule-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    padding: 1.5rem;
-    cursor: pointer;
-    transition: all 0.5s ease;
-    position: relative;
-    overflow: hidden;
-  }
+.animate-scale-in {
+  animation: scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
-  .capsule-card:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0 5px #00f3ff, 0 0 20px rgba(0, 243, 255, 0.5);
-  }
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
 
-  /* Holographic Effect */
-  .holographic {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    border-left: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  }
+.shimmer-bg {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
 }

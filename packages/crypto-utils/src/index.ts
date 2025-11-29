@@ -27,9 +27,8 @@ export const generateSalt = (): string => {
     return bufferToBase64(salt.buffer);
 };
 
-// 2. Derive Keys from Password (PBKDF2 - 200k iterations)
-// Derives 512 bits, splits into 256-bit AES key and 256-bit HMAC key
-export const deriveCapsuleKeys = async (password: string, salt: string): Promise<CapsuleKeys> => {
+// 2. Derive Key Material (512 bits)
+export const deriveKeyMaterial = async (password: string, salt: string): Promise<ArrayBuffer> => {
     const keyMaterial = await window.crypto.subtle.importKey(
         "raw",
         enc.encode(password),
@@ -38,7 +37,7 @@ export const deriveCapsuleKeys = async (password: string, salt: string): Promise
         ["deriveBits"]
     );
 
-    const derivedBits = await window.crypto.subtle.deriveBits(
+    return await window.crypto.subtle.deriveBits(
         {
             name: "PBKDF2",
             salt: base64ToBuffer(salt),
@@ -48,9 +47,12 @@ export const deriveCapsuleKeys = async (password: string, salt: string): Promise
         keyMaterial,
         512 // 256 bits for AES + 256 bits for HMAC
     );
+};
 
-    const encKeyBuffer = derivedBits.slice(0, 32);
-    const macKeyBuffer = derivedBits.slice(32, 64);
+// 3. Import Keys from Material
+export const importKeysFromMaterial = async (material: ArrayBuffer): Promise<CapsuleKeys> => {
+    const encKeyBuffer = material.slice(0, 32);
+    const macKeyBuffer = material.slice(32, 64);
 
     const encKey = await window.crypto.subtle.importKey(
         "raw",
@@ -69,6 +71,26 @@ export const deriveCapsuleKeys = async (password: string, salt: string): Promise
     );
 
     return { encKey, macKey };
+};
+
+// 4. Derive Keys (Standard Flow)
+export const deriveCapsuleKeys = async (password: string, salt: string): Promise<CapsuleKeys> => {
+    const material = await deriveKeyMaterial(password, salt);
+    return importKeysFromMaterial(material);
+};
+
+// 5. Recovery Key Helpers
+export const exportRecoveryKey = async (password: string, salt: string): Promise<string> => {
+    const material = await deriveKeyMaterial(password, salt);
+    return bufferToBase64(material);
+};
+
+export const importRecoveryKey = async (recoveryKey: string): Promise<CapsuleKeys> => {
+    const material = base64ToBuffer(recoveryKey);
+    if (material.byteLength !== 64) {
+        throw new Error("Invalid recovery key length");
+    }
+    return importKeysFromMaterial(material);
 };
 
 // 3. Encrypt Data (AES-GCM + HMAC)

@@ -37,6 +37,7 @@ const CreateCapsuleSchema = z.object({
     size: z.number(),
     unlockAt: z.string().optional(),
     aura: z.string().optional(),
+    id: z.string().optional(),
 });
 
 router.get("/", async (req: AuthRequest, res: Response) => {
@@ -51,7 +52,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
         const data = CreateCapsuleSchema.parse(req.body);
 
         const newCapsule: Capsule = {
-            id: crypto.randomUUID(),
+            id: req.body.id || crypto.randomUUID(),
             userId: req.userId,
             ...data,
             createdAt: new Date().toISOString(),
@@ -61,8 +62,11 @@ router.post("/", async (req: AuthRequest, res: Response) => {
         await db.createCapsule(newCapsule);
         res.status(201).json(newCapsule);
     } catch (error) {
-        console.error(error);
-        res.status(400).json({ message: "Invalid input" });
+        console.error("Create Capsule Error:", error);
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ message: "Invalid input", errors: error.errors });
+        }
+        res.status(400).json({ message: "Invalid input", error: String(error) });
     }
 });
 

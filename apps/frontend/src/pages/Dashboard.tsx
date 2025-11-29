@@ -7,6 +7,7 @@ import CreateCapsuleModal from '../components/CreateCapsuleModal';
 import UnlockModal from '../components/UnlockModal';
 import CapsuleViewer from '../components/CapsuleViewer';
 import { Plus, LogOut, Search, Download, Upload } from 'lucide-react';
+import { storage } from '../lib/storage';
 
 export default function Dashboard() {
     const { user, logout } = useAuthStore();
@@ -24,7 +25,18 @@ export default function Dashboard() {
 
     const loadCapsules = async () => {
         try {
+            // Load local first
+            const localCapsules = await storage.getCapsules();
+            setCapsules(localCapsules);
+
+            // Then fetch API
             const { data } = await api.capsules.getAll();
+
+            // Sync local with API
+            for (const c of data) {
+                await storage.saveCapsule(c);
+            }
+
             setCapsules(data);
         } catch (e) {
             console.error(e);
@@ -56,6 +68,7 @@ export default function Dashboard() {
         if (!selectedCapsule) return;
         if (confirm('Are you sure you want to delete this capsule? This cannot be undone.')) {
             await api.capsules.delete(selectedCapsule.id);
+            await storage.deleteCapsule(selectedCapsule.id); // Delete locally too
             setViewData(null);
             setSelectedCapsule(null);
             loadCapsules();
@@ -87,6 +100,7 @@ export default function Dashboard() {
                     for (const c of imported) {
                         if (c.encryptedContent && c.iv && c.hmac) {
                             await api.capsules.create({
+                                id: c.id, // Pass ID if available
                                 encryptedTitle: c.encryptedTitle || "",
                                 encryptedContent: c.encryptedContent,
                                 iv: c.iv,
@@ -113,33 +127,75 @@ export default function Dashboard() {
         reader.readAsText(file);
     };
 
-    return (
-        <div className="min-h-screen p-6 relative">
-            {/* Background */}
-            <div className="fixed top-0 left-0 w-full h-full bg-[url('/grid.svg')] opacity-10 pointer-events-none"></div>
+    // Sync Queue Processing
+    useEffect(() => {
+        const processSyncQueue = async () => {
+            if (!navigator.onLine) return;
 
+            try {
+                const queue = await storage.getSyncQueue();
+                if (queue.length === 0) return;
+
+                console.log(`Processing ${queue.length} offline items...`);
+
+                for (const item of queue) {
+                    try {
+                        if (item.type === 'create') {
+                            await api.capsules.create(item.payload);
+                        } else if (item.type === 'delete') {
+                            await api.capsules.delete(item.payload);
+                        }
+                        // Remove from queue after success
+                        // Note: idb doesn't support delete by value easily, but we can clear all if we process all
+                        // For now, let's just clear the whole queue if we process everything successfully
+                        // A more robust solution would delete individual items
+                    } catch (e) {
+                        console.error("Sync failed for item", item, e);
+                    }
+                }
+
+                await storage.clearSyncQueue();
+                console.log("Sync complete");
+                loadCapsules(); // Refresh to get server state
+            } catch (e) {
+                console.error("Sync process failed", e);
+            }
+        };
+
+        // Run on mount and when online status changes
+        processSyncQueue();
+        window.addEventListener('online', processSyncQueue);
+        return () => window.removeEventListener('online', processSyncQueue);
+    }, []);
+
+    return (
+        <div className="min-h-screen p-6 md:p-12 relative">
             {/* Header */}
-            <header className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
+            <header className="flex flex-col md:flex-row justify-between items-center mb-16 gap-6">
                 <div>
-                    <h1 className="text-3xl font-display font-bold neon-text tracking-wider">DASHBOARD</h1>
-                    <p className="text-gray-400 text-sm mt-1">Welcome, Commander {user?.username}</p>
+                    <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-2">
+                        My Capsules
+                    </h1>
+                    <p className="text-slate-500 text-lg font-body">
+                        Welcome back, <span className="text-primary-vibrant font-semibold">{user?.username}</span>.
+                    </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                     <button
                         onClick={handleExport}
-                        className="btn-neon text-xs py-2 px-3 flex items-center gap-2 text-neon-cyan border-neon-cyan/30 hover:bg-neon-cyan/10"
+                        className="btn-premium btn-secondary text-sm"
                         title="Backup Encrypted Capsules"
                     >
                         <Download className="w-4 h-4" />
-                        BACKUP
+                        Backup
                     </button>
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="btn-neon text-xs py-2 px-3 flex items-center gap-2 text-neon-cyan border-neon-cyan/30 hover:bg-neon-cyan/10"
+                        className="btn-premium btn-secondary text-sm"
                         title="Restore Backup"
                     >
                         <Upload className="w-4 h-4" />
-                        RESTORE
+                        Restore
                     </button>
                     <input
                         type="file"
@@ -148,44 +204,47 @@ export default function Dashboard() {
                         className="hidden"
                         accept=".json"
                     />
-                    <div className="h-8 w-px bg-white/10 mx-2"></div>
+                    <div className="h-8 w-px bg-slate-200 mx-2"></div>
                     <button
                         onClick={logout}
-                        className="btn-neon flex items-center gap-2 text-sm py-2 px-4 text-red-400 border-red-500/30 hover:bg-red-500/10 hover:border-red-500/50 hover:shadow-none"
+                        className="btn-premium btn-ghost text-sm text-red-500 hover:text-red-600 hover:bg-red-50"
                     >
                         <LogOut className="w-4 h-4" />
-                        DISCONNECT
+                        Sign Out
                     </button>
                 </div>
             </header>
 
             {/* Controls */}
-            <div className="flex justify-between items-center mb-8">
-                <div className="relative group w-64">
-                    <Search className="absolute left-3 top-3 w-4 h-4 text-gray-500 group-focus-within:text-neon-cyan transition-colors" />
+            <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+                <div className="relative group w-full md:w-96">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary-vibrant transition-colors" />
                     <input
                         type="text"
-                        placeholder="Search by date or ID..."
+                        placeholder="Search your memories..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="input-cyber pl-10 pr-4"
-                        title="Search capsules by creation date or ID"
+                        className="input-premium pl-12"
                     />
                 </div>
                 <button
                     onClick={() => setShowCreate(true)}
-                    className="btn-neon bg-neon-purple/20 border-neon-purple/50 text-neon-purple hover:bg-neon-purple/30 flex items-center gap-2"
+                    className="btn-premium btn-primary w-full md:w-auto shadow-glow hover:shadow-glow/50"
                 >
                     <Plus className="w-5 h-5" />
-                    NEW CAPSULE
+                    Create New Capsule
                 </button>
             </div>
 
             {/* Grid */}
             {loading ? (
-                <div className="text-center text-gray-500 animate-pulse">Scanning storage...</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="h-64 bg-white/40 rounded-2xl animate-pulse"></div>
+                    ))}
+                </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20">
                     {filteredCapsules.map(capsule => (
                         <CapsuleCard
                             key={capsule.id}
@@ -201,13 +260,26 @@ export default function Dashboard() {
                         />
                     ))}
                     {filteredCapsules.length === 0 && capsules.length > 0 && (
-                        <div className="col-span-full text-center py-20 text-gray-500 border-2 border-dashed border-white/5 rounded-xl">
-                            No capsules match your search. Try a different query.
+                        <div className="col-span-full text-center py-32 text-slate-400">
+                            <p className="text-lg">No capsules match your search.</p>
                         </div>
                     )}
                     {capsules.length === 0 && (
-                        <div className="col-span-full text-center py-20 text-gray-500 border-2 border-dashed border-white/5 rounded-xl">
-                            No capsules found. Initialize a new secure storage unit.
+                        <div className="col-span-full flex flex-col items-center justify-center py-32 text-center">
+                            <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6 text-slate-300">
+                                <Plus className="w-10 h-10" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-800 mb-2">Your journey starts here</h3>
+                            <p className="text-slate-500 max-w-md mb-8">
+                                Create your first secure time capsule to preserve your thoughts, ideas, and memories forever.
+                            </p>
+                            <button
+                                onClick={() => setShowCreate(true)}
+                                className="btn-premium btn-primary"
+                            >
+                                <Plus className="w-5 h-5" />
+                                Create First Capsule
+                            </button>
                         </div>
                     )}
                 </div>

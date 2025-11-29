@@ -16,7 +16,10 @@ const realApi = {
             });
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.message || 'Signup failed');
+                const detailedMessage = error.errors
+                    ? error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')
+                    : error.message || 'Signup failed';
+                throw new Error(detailedMessage);
             }
             return await response.json();
         },
@@ -30,7 +33,10 @@ const realApi = {
             });
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.message || 'Login failed');
+                const detailedMessage = error.errors
+                    ? error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')
+                    : error.message || 'Login failed';
+                throw new Error(detailedMessage);
             }
             return await response.json();
         },
@@ -71,7 +77,7 @@ const realApi = {
             return { data };
         },
 
-        async create(capsule: Omit<Capsule, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) {
+        async create(capsule: Omit<Capsule, 'createdAt' | 'updatedAt' | 'userId'>) {
             const response = await fetch(`${API_URL}/capsules`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -80,7 +86,10 @@ const realApi = {
             });
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.message || 'Failed to create capsule');
+                const detailedMessage = error.errors
+                    ? error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')
+                    : error.message || 'Failed to create capsule';
+                throw new Error(detailedMessage);
             }
             const data = await response.json();
             return { data };
