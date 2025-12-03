@@ -4,6 +4,9 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { authRouter } from "./auth";
 import { capsulesRouter } from "./capsules";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;

@@ -1,125 +1,165 @@
-import Database from 'better-sqlite3';
+import { Pool } from 'pg';
 import { User, Capsule } from "@secret-capsule/types";
-import path from 'path';
+import dotenv from 'dotenv';
 
-const dbPath = process.env.DATABASE_PATH
-    ? path.resolve(process.env.DATABASE_PATH, 'database.sqlite')
-    : path.resolve(__dirname, '../database.sqlite');
-const sql = new Database(dbPath);
+dotenv.config();
 
-console.log(`Database path: ${dbPath}`);
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
-try {
-    sql.exec(`
-        CREATE TABLE IF NOT EXISTS users (
-            id TEXT PRIMARY KEY,
-            username TEXT UNIQUE,
-            email TEXT UNIQUE,
-            passwordHash TEXT,
-            salt TEXT,
-            createdAt TEXT
-        );
+// Initialize Tables
+const initDb = async () => {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                username TEXT UNIQUE,
+                email TEXT UNIQUE,
+                password_hash TEXT,
+                salt TEXT,
+                created_at TEXT
+            );
+        `);
 
-        CREATE TABLE IF NOT EXISTS capsules (
-            id TEXT PRIMARY KEY,
-            userId TEXT,
-            encryptedTitle TEXT,
-            encryptedContent TEXT,
-            iv TEXT,
-            salt TEXT,
-            hmac TEXT,
-            size INTEGER,
-            createdAt TEXT,
-            updatedAt TEXT,
-            unlockAt TEXT,
-            aura TEXT,
-            FOREIGN KEY(userId) REFERENCES users(id)
-        );
-    `);
-    console.log("Database tables initialized successfully.");
-} catch (err) {
-    console.error("Failed to initialize database tables:", err);
-}
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS capsules (
+                id TEXT PRIMARY KEY,
+                user_id TEXT REFERENCES users(id),
+                encrypted_title TEXT,
+                encrypted_content TEXT,
+                iv TEXT,
+                salt TEXT,
+                hmac TEXT,
+                size INTEGER,
+                created_at TEXT,
+                updated_at TEXT,
+                unlock_at TEXT,
+                aura TEXT
+            );
+        `);
+        console.log("Database tables initialized successfully.");
+    } catch (err) {
+        console.error("Failed to initialize database tables:", err);
+    }
+};
 
-// Migration for existing databases
-try {
-    sql.exec('ALTER TABLE capsules ADD COLUMN unlockAt TEXT');
-} catch (e) {
-    // Column likely already exists
-}
+initDb();
 
-try {
-    sql.exec('ALTER TABLE capsules ADD COLUMN aura TEXT');
-} catch (e) {
-    // Column likely already exists
-}
-
-class SQLiteDB {
+class PostgresDB {
     async findUserByEmail(email: string): Promise<User | undefined> {
-        const stmt = sql.prepare('SELECT * FROM users WHERE email = ?');
-        return stmt.get(email) as User | undefined;
+        const res = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (res.rows.length === 0) return undefined;
+        return this.mapUser(res.rows[0]);
     }
 
     async findUserByUsername(username: string): Promise<User | undefined> {
-        const stmt = sql.prepare('SELECT * FROM users WHERE username = ?');
-        return stmt.get(username) as User | undefined;
+        const res = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (res.rows.length === 0) return undefined;
+        return this.mapUser(res.rows[0]);
     }
 
     async findUserById(id: string): Promise<User | undefined> {
-        const stmt = sql.prepare('SELECT * FROM users WHERE id = ?');
-        return stmt.get(id) as User | undefined;
+        const res = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+        if (res.rows.length === 0) return undefined;
+        return this.mapUser(res.rows[0]);
     }
 
     async createUser(user: User): Promise<void> {
-        const stmt = sql.prepare(`
-            INSERT INTO users (id, username, email, passwordHash, salt, createdAt)
-            VALUES (@id, @username, @email, @passwordHash, @salt, @createdAt)
-        `);
-        stmt.run(user);
+        await pool.query(
+            `INSERT INTO users (id, username, email, password_hash, salt, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [user.id, user.username, user.email, user.passwordHash, user.salt, user.createdAt]
+        );
     }
 
     async getCapsules(userId: string): Promise<Capsule[]> {
-        const stmt = sql.prepare('SELECT * FROM capsules WHERE userId = ? ORDER BY createdAt DESC');
-        return stmt.all(userId) as Capsule[];
+        const res = await pool.query('SELECT * FROM capsules WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+        return res.rows.map(this.mapCapsule);
     }
 
     async createCapsule(capsule: Capsule): Promise<void> {
-        const stmt = sql.prepare(`
-            INSERT INTO capsules (id, userId, encryptedTitle, encryptedContent, iv, salt, hmac, size, createdAt, updatedAt, unlockAt, aura)
-            VALUES (@id, @userId, @encryptedTitle, @encryptedContent, @iv, @salt, @hmac, @size, @createdAt, @updatedAt, @unlockAt, @aura)
-        `);
-        stmt.run({
-            ...capsule,
-            unlockAt: capsule.unlockAt || null,
-            aura: capsule.aura || null
-        });
+        await pool.query(
+            `INSERT INTO capsules (id, user_id, encrypted_title, encrypted_content, iv, salt, hmac, size, created_at, updated_at, unlock_at, aura)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+            [
+                capsule.id,
+                capsule.userId,
+                capsule.encryptedTitle,
+                capsule.encryptedContent,
+                capsule.iv,
+                capsule.salt,
+                capsule.hmac,
+                capsule.size,
+                capsule.createdAt,
+                capsule.updatedAt,
+                capsule.unlockAt || null,
+                capsule.aura || null
+            ]
+        );
     }
 
     async deleteCapsule(id: string): Promise<void> {
-        const stmt = sql.prepare('DELETE FROM capsules WHERE id = ?');
-        stmt.run(id);
+        await pool.query('DELETE FROM capsules WHERE id = $1', [id]);
     }
 
     async updateCapsule(capsule: Capsule): Promise<void> {
-        const stmt = sql.prepare(`
-            UPDATE capsules 
-            SET encryptedTitle = @encryptedTitle,
-                encryptedContent = @encryptedContent,
-                iv = @iv,
-                salt = @salt,
-                hmac = @hmac,
-                size = @size,
-                updatedAt = @updatedAt,
-                unlockAt = @unlockAt,
-                aura = @aura
-            WHERE id = @id
-        `);
-        stmt.run({
-            ...capsule,
-            unlockAt: capsule.unlockAt || null,
-            aura: capsule.aura || null
-        });
+        await pool.query(
+            `UPDATE capsules 
+             SET encrypted_title = $1,
+                 encrypted_content = $2,
+                 iv = $3,
+                 salt = $4,
+                 hmac = $5,
+                 size = $6,
+                 updated_at = $7,
+                 unlock_at = $8,
+                 aura = $9
+             WHERE id = $10`,
+            [
+                capsule.encryptedTitle,
+                capsule.encryptedContent,
+                capsule.iv,
+                capsule.salt,
+                capsule.hmac,
+                capsule.size,
+                capsule.updatedAt,
+                capsule.unlockAt || null,
+                capsule.aura || null,
+                capsule.id
+            ]
+        );
+    }
+
+    // Helpers to map DB snake_case to TS camelCase
+    private mapUser(row: any): User {
+        return {
+            id: row.id,
+            username: row.username,
+            email: row.email,
+            passwordHash: row.password_hash,
+            salt: row.salt,
+            createdAt: row.created_at
+        };
+    }
+
+    private mapCapsule(row: any): Capsule {
+        return {
+            id: row.id,
+            userId: row.user_id,
+            encryptedTitle: row.encrypted_title,
+            encryptedContent: row.encrypted_content,
+            iv: row.iv,
+            salt: row.salt,
+            hmac: row.hmac,
+            size: row.size,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at,
+            unlockAt: row.unlock_at || undefined,
+            aura: row.aura || undefined
+        };
     }
 }
 
-export const db = new SQLiteDB();
+export const db = new PostgresDB();
