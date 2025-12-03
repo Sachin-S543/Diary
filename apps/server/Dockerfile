@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Build types first (if needed)
-# RUN npm run build -w packages/types
+RUN npm run build -w packages/types
 
 # Build server
 RUN npm run build -w apps/server
