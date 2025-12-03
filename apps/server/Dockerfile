@@ -1,9 +1,16 @@
 FROM node:18-alpine AS builder
 
 WORKDIR /app
+
+# Copy root package files
 COPY package*.json ./
+COPY tsconfig.base.json ./
+
+# Copy all workspaces package files
 COPY apps/server/package.json ./apps/server/
 COPY packages/types/package.json ./packages/types/
+COPY packages/crypto-utils/package.json ./packages/crypto-utils/
+COPY packages/ui/package.json ./packages/ui/
 
 # Install dependencies
 RUN npm install
@@ -11,7 +18,7 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Build types first (if needed)
+# Build types first
 RUN npm run build -w packages/types
 
 # Build server

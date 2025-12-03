@@ -5,7 +5,12 @@
         "rootDir": "./src",
         "module": "commonjs",
         "target": "es2020",
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "paths": {
+            "@secret-capsule/types": [
+                "../../packages/types/src/index.ts"
+            ]
+        }
     },
     "include": [
         "src/**/*"
