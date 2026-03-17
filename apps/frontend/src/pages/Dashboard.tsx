@@ -7,7 +7,11 @@ import CreateCapsuleModal from '../components/CreateCapsuleModal';
 import UnlockModal from '../components/UnlockModal';
 import CapsuleViewer from '../components/CapsuleViewer';
 import SettingsModal from '../components/SettingsModal';
-import { Plus, LogOut, Search, Download, Upload, Settings } from 'lucide-react';
+import { 
+    Plus, LogOut, Search, Download, Upload, Settings, 
+    LayoutGrid, Clock, Shield, X, Check,
+    Database, Hash
+} from 'lucide-react';
 import { storage } from '../lib/storage';
 
 export default function Dashboard() {
@@ -19,6 +23,9 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [showSettings, setShowSettings] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<'all' | 'recent' | 'locked'>('all');
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -27,18 +34,14 @@ export default function Dashboard() {
 
     const loadCapsules = async () => {
         try {
-            // Load local first
+            setLoading(true);
             const localCapsules = await storage.getCapsules();
             setCapsules(localCapsules);
 
-            // Then fetch API
             const { data } = await api.capsules.getAll();
-
-            // Sync local with API
             for (const c of data) {
                 await storage.saveCapsule(c);
             }
-
             setCapsules(data);
         } catch (e) {
             console.error(e);
@@ -47,19 +50,21 @@ export default function Dashboard() {
         }
     };
 
-    // Filter capsules based on search query (by date)
     const filteredCapsules = capsules.filter(capsule => {
-        if (!searchQuery.trim()) return true;
-
         const query = searchQuery.toLowerCase();
-        const date = new Date(capsule.createdAt).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        }).toLowerCase();
-
-        // Search by date or capsule ID
-        return date.includes(query) || capsule.id.toString().includes(query);
+        const date = new Date(capsule.createdAt).toLocaleDateString().toLowerCase();
+        
+        let matchesQuery = !query || date.includes(query) || capsule.id.includes(query);
+        
+        if (activeTab === 'recent') {
+            const daysAgo = (Date.now() - new Date(capsule.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+            return matchesQuery && daysAgo < 7;
+        }
+        if (activeTab === 'locked') {
+            return matchesQuery && capsule.unlockAt && new Date(capsule.unlockAt) > new Date();
+        }
+        
+        return matchesQuery;
     });
 
     const handleUnlock = (data: { title: string; content: string }) => {
@@ -68,9 +73,9 @@ export default function Dashboard() {
 
     const handleDelete = async () => {
         if (!selectedCapsule) return;
-        if (confirm('Are you sure you want to delete this capsule? This cannot be undone.')) {
+        if (confirm('Permanently delete this capsule? This action cannot be reversed.')) {
             await api.capsules.delete(selectedCapsule.id);
-            await storage.deleteCapsule(selectedCapsule.id); // Delete locally too
+            await storage.deleteCapsule(selectedCapsule.id);
             setViewData(null);
             setSelectedCapsule(null);
             loadCapsules();
@@ -83,11 +88,8 @@ export default function Dashboard() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `secret-capsules-backup-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
+        a.download = `inkrypt-backup-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
     };
 
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,214 +100,218 @@ export default function Dashboard() {
             try {
                 const imported = JSON.parse(e.target?.result as string);
                 if (Array.isArray(imported)) {
-                    let count = 0;
                     for (const c of imported) {
-                        if (c.encryptedContent && c.iv && c.hmac) {
-                            await api.capsules.create({
-                                id: c.id, // Pass ID if available
-                                encryptedTitle: c.encryptedTitle || "",
-                                encryptedContent: c.encryptedContent,
-                                iv: c.iv,
-                                salt: c.salt,
-                                hmac: c.hmac,
-                                size: c.size || 0,
-                                unlockAt: c.unlockAt,
-                                aura: c.aura
-                            });
-                            count++;
-                        }
+                        await api.capsules.create(c);
                     }
                     loadCapsules();
-                    alert(`Successfully imported ${count} capsules.`);
-                } else {
-                    alert('Invalid backup file format.');
+                    alert('Import complete.');
                 }
             } catch (err) {
-                console.error(err);
-                alert('Import failed: Invalid file or corrupted data.');
+                alert('Import failed.');
             }
-            if (fileInputRef.current) fileInputRef.current.value = '';
         };
         reader.readAsText(file);
     };
 
-    // Sync Queue Processing
-    useEffect(() => {
-        const processSyncQueue = async () => {
-            if (!navigator.onLine) return;
-
-            try {
-                const queue = await storage.getSyncQueue();
-                if (queue.length === 0) return;
-
-                console.log(`Processing ${queue.length} offline items...`);
-
-                for (const item of queue) {
-                    try {
-                        if (item.type === 'create') {
-                            await api.capsules.create(item.payload);
-                        } else if (item.type === 'delete') {
-                            await api.capsules.delete(item.payload);
-                        }
-                        // Remove from queue after success
-                        // Note: idb doesn't support delete by value easily, but we can clear all if we process all
-                        // For now, let's just clear the whole queue if we process everything successfully
-                        // A more robust solution would delete individual items
-                    } catch (e) {
-                        console.error("Sync failed for item", item, e);
-                    }
-                }
-
-                await storage.clearSyncQueue();
-                console.log("Sync complete");
-                loadCapsules(); // Refresh to get server state
-            } catch (e) {
-                console.error("Sync process failed", e);
-            }
-        };
-
-        // Run on mount and when online status changes
-        processSyncQueue();
-        window.addEventListener('online', processSyncQueue);
-        return () => window.removeEventListener('online', processSyncQueue);
-    }, []);
-
     return (
-        <div className="min-h-screen p-6 md:p-12 relative">
-            {/* Header */}
-            <header className="flex flex-col md:flex-row justify-between items-center mb-16 gap-6">
-                <div>
-                    <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-2">
-                        My Capsules
-                    </h1>
-                    <p className="text-slate-500 text-lg font-body">
-                        Welcome back, <span className="text-primary-vibrant font-semibold">{user?.username}</span>.
-                    </p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={handleExport}
-                        className="btn-premium btn-secondary text-sm"
-                        title="Backup Encrypted Capsules"
-                    >
-                        <Download className="w-4 h-4" />
-                        Backup
-                    </button>
-                    <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="btn-premium btn-secondary text-sm"
-                        title="Restore Backup"
-                    >
-                        <Upload className="w-4 h-4" />
-                        Restore
-                    </button>
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleImport}
-                        className="hidden"
-                        accept=".json"
-                    />
-                    <div className="h-8 w-px bg-slate-200 mx-2"></div>
-                    <button
-                        onClick={() => setShowSettings(true)}
-                        className="btn-premium btn-ghost text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100"
-                    >
-                        <Settings className="w-4 h-4" />
-                        Settings
-                    </button>
-                    <button
-                        onClick={logout}
-                        className="btn-premium btn-ghost text-sm text-red-500 hover:text-red-600 hover:bg-red-50"
-                    >
-                        <LogOut className="w-4 h-4" />
-                        Sign Out
-                    </button>
-                </div>
-            </header>
+        <div className="flex h-screen bg-inkrypt-main overflow-hidden">
+            {/* Mobile Sidebar Toggle */}
+            <button 
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-primary-vibrant text-white rounded-full shadow-glow"
+            >
+                {isSidebarOpen ? <X /> : <Plus />}
+            </button>
 
-            {/* Controls */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-                <div className="relative group w-full md:w-96">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary-vibrant transition-colors" />
-                    <input
-                        type="text"
-                        placeholder="Search your memories..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="input-premium pl-12"
-                    />
-                </div>
-                <button
-                    onClick={() => setShowCreate(true)}
-                    className="btn-premium btn-primary w-full md:w-auto shadow-glow hover:shadow-glow/50"
-                >
-                    <Plus className="w-5 h-5" />
-                    Create New Capsule
-                </button>
-            </div>
-
-            {/* Grid */}
-            {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-64 bg-white/40 rounded-2xl animate-pulse"></div>
-                    ))}
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20">
-                    {filteredCapsules.map(capsule => (
-                        <CapsuleCard
-                            key={capsule.id}
-                            capsule={capsule}
-                            onClick={() => {
-                                if (capsule.unlockAt && new Date(capsule.unlockAt) > new Date()) {
-                                    const date = new Date(capsule.unlockAt).toLocaleString();
-                                    alert(`This capsule is time-locked until ${date}. You cannot open it yet.`);
-                                    return;
-                                }
-                                setSelectedCapsule(capsule);
-                            }}
-                        />
-                    ))}
-                    {filteredCapsules.length === 0 && capsules.length > 0 && (
-                        <div className="col-span-full text-center py-32 text-slate-400">
-                            <p className="text-lg">No capsules match your search.</p>
+            {/* Sidebar */}
+            <aside className={`
+                fixed lg:relative inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-100 transition-transform duration-300 transform
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            `}>
+                <div className="flex flex-col h-full p-6">
+                    <div className="flex items-center gap-3 mb-10 px-2">
+                        <div className="w-10 h-10 bg-primary-vibrant rounded-xl flex items-center justify-center text-white shadow-glow">
+                            <Shield className="w-6 h-6" />
                         </div>
-                    )}
-                    {capsules.length === 0 && (
-                        <div className="col-span-full flex flex-col items-center justify-center py-32 text-center">
-                            <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6 text-slate-300">
-                                <Plus className="w-10 h-10" />
+                        <span className="text-xl font-black text-slate-900 tracking-tight">Inkrypt</span>
+                    </div>
+
+                    <nav className="space-y-1.5 flex-1">
+                        <div 
+                            onClick={() => { setActiveTab('all'); setIsSidebarOpen(false); }}
+                            className={`sidebar-link ${activeTab === 'all' ? 'active' : ''}`}
+                        >
+                            <LayoutGrid className="w-5 h-5" /> All Capsules
+                        </div>
+                        <div 
+                            onClick={() => { setActiveTab('recent'); setIsSidebarOpen(false); }}
+                            className={`sidebar-link ${activeTab === 'recent' ? 'active' : ''}`}
+                        >
+                            <Clock className="w-5 h-5" /> Recent
+                        </div>
+                        <div 
+                            onClick={() => { setActiveTab('locked'); setIsSidebarOpen(false); }}
+                            className={`sidebar-link ${activeTab === 'locked' ? 'active' : ''}`}
+                        >
+                            <Shield className="w-5 h-5" /> Time Locked
+                        </div>
+                        <div className="pt-4 pb-2 px-2">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Management</span>
+                        </div>
+                        <div onClick={handleExport} className="sidebar-link">
+                            <Download className="w-5 h-5" /> Backup Data
+                        </div>
+                        <div onClick={() => fileInputRef.current?.click()} className="sidebar-link">
+                            <Upload className="w-5 h-5" /> Restore
+                        </div>
+                    </nav>
+
+                    <div className="mt-auto space-y-1.5 pt-6 border-t border-slate-50">
+                        <div onClick={() => setShowSettings(true)} className="sidebar-link">
+                            <Settings className="w-5 h-5" /> Settings
+                        </div>
+                        <div onClick={logout} className="sidebar-link text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                            <LogOut className="w-5 h-5" /> Sign Out
+                        </div>
+                        
+                        <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100/50">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Database className="w-3 h-3 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-500 uppercase">Storage Used</span>
                             </div>
-                            <h3 className="text-2xl font-bold text-slate-800 mb-2">Your journey starts here</h3>
-                            <p className="text-slate-500 max-w-md mb-8">
-                                Create your first secure time capsule to preserve your thoughts, ideas, and memories forever.
-                            </p>
+                            <div className="w-full bg-slate-200 h-1 rounded-full overflow-hidden">
+                                <div className="bg-primary-vibrant h-full w-[15%]" />
+                            </div>
+                            <span className="text-[10px] text-slate-400 mt-2 block">12.4 MB / 100 MB</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 flex flex-col min-w-0 bg-slate-50/50">
+                <header className="h-20 bg-white/40 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-8 z-10">
+                    <div className="flex-1 max-w-xl">
+                        <div className="relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary-vibrant transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="Search capsules by date or ID..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-slate-100/50 border-transparent focus:bg-white focus:border-primary-soft/30 rounded-full pl-11 pr-4 py-2.5 text-sm transition-all outline-none"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 ml-6">
+                        <div className="hidden sm:flex flex-col items-end mr-2">
+                            <span className="text-xs font-bold text-slate-900">{user?.username}</span>
+                            <span className="text-[10px] text-slate-400 uppercase tracking-tighter">Verified User</span>
+                        </div>
+                        <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
+                            <div className="w-full h-full bg-gradient-to-br from-primary-vibrant to-accent-purple opacity-80" />
+                        </div>
+                    </div>
+                </header>
+
+                <div className="flex-1 overflow-y-auto p-8 lg:p-12">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                            <div>
+                                <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">
+                                    {activeTab === 'all' ? 'All Memories' : activeTab === 'recent' ? 'Recent Activity' : 'Locked Vaults'}
+                                </h1>
+                                <p className="text-slate-500 font-medium">
+                                    You have <span className="text-primary-vibrant">{capsules.length}</span> secure entries stored on this vault.
+                                </p>
+                            </div>
                             <button
                                 onClick={() => setShowCreate(true)}
-                                className="btn-premium btn-primary"
+                                className="btn-premium btn-primary px-8 h-12 shadow-glow hover:shadow-glow/50"
                             >
-                                <Plus className="w-5 h-5" />
-                                Create First Capsule
+                                <Plus className="w-5 h-5" /> New Capsule
                             </button>
                         </div>
-                    )}
+
+                        {/* Recent Stats Panels */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
+                                <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                                    <Hash className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <span className="text-2xl font-black text-slate-900">{capsules.length}</span>
+                                    <p className="text-xs font-bold text-slate-400 uppercase">Total Capsules</p>
+                                </div>
+                            </div>
+                            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
+                                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                                    <Check className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <span className="text-2xl font-black text-slate-900">
+                                        {capsules.filter(c => !c.unlockAt || new Date(c.unlockAt) <= new Date()).length}
+                                    </span>
+                                    <p className="text-xs font-bold text-slate-400 uppercase">Available</p>
+                                </div>
+                            </div>
+                            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
+                                <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+                                    <Clock className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <span className="text-2xl font-black text-slate-900">
+                                        {capsules.filter(c => c.unlockAt && new Date(c.unlockAt) > new Date()).length}
+                                    </span>
+                                    <p className="text-xs font-bold text-slate-400 uppercase">Vaulted</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {loading ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
+                                {[1, 2, 3, 4].map(i => (
+                                    <div key={i} className="h-64 bg-white/60 rounded-3xl animate-pulse border border-slate-100"></div>
+                                ))}
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8 pb-32">
+                                    {filteredCapsules.map(capsule => (
+                                        <CapsuleCard
+                                            key={capsule.id}
+                                            capsule={capsule}
+                                            onClick={() => setSelectedCapsule(capsule)}
+                                        />
+                                    ))}
+                                </div>
+
+                                {filteredCapsules.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center py-40 text-center bg-white/30 rounded-[40px] border border-dashed border-slate-200">
+                                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 text-slate-300">
+                                            <Search className="w-10 h-10" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-slate-800">No capsules found</h3>
+                                        <p className="text-slate-500 max-w-xs mt-2">Try adjusting your filters or search query.</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
                 </div>
-            )}
+            </main>
 
             {/* Modals */}
+            <input type="file" ref={fileInputRef} onChange={handleImport} className="hidden" accept=".json" />
+            
             {showCreate && (
                 <CreateCapsuleModal
                     onClose={() => setShowCreate(false)}
                     onSuccess={() => { setShowCreate(false); loadCapsules(); }}
                 />
             )}
-
-            {showSettings && (
-                <SettingsModal onClose={() => setShowSettings(false)} />
-            )}
-
+            {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
             {selectedCapsule && !viewData && (
                 <UnlockModal
                     capsule={selectedCapsule}
@@ -313,7 +319,6 @@ export default function Dashboard() {
                     onUnlock={handleUnlock}
                 />
             )}
-
             {viewData && (
                 <CapsuleViewer
                     data={viewData}
@@ -324,3 +329,4 @@ export default function Dashboard() {
         </div>
     );
 }
+
