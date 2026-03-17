@@ -21,13 +21,17 @@ export interface EncryptedContent {
     hmac: string;
 }
 
+export * from './kdf';
+export * from './encryptedStore';
+export * from './attachmentCrypto';
+
 // 1. Generate Random Salt (128-bit)
 export const generateSalt = (): string => {
     const salt = window.crypto.getRandomValues(new Uint8Array(16));
     return bufferToBase64(salt.buffer);
 };
 
-// 2. Derive Key Material (512 bits)
+// V1 Key Derivation Material (for backward compatibility if needed directly, though kdf.ts has derivePBKDF2Key)
 export const deriveKeyMaterial = async (password: string, salt: string): Promise<ArrayBuffer> => {
     const keyMaterial = await window.crypto.subtle.importKey(
         "raw",
@@ -73,7 +77,7 @@ export const importKeysFromMaterial = async (material: ArrayBuffer): Promise<Cap
     return { encKey, macKey };
 };
 
-// 4. Derive Keys (Standard Flow)
+// 4. Derive Keys (Standard Flow - V1 Legacy)
 export const deriveCapsuleKeys = async (password: string, salt: string): Promise<CapsuleKeys> => {
     const material = await deriveKeyMaterial(password, salt);
     return importKeysFromMaterial(material);

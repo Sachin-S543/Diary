@@ -6,7 +6,8 @@ import CapsuleCard from '../components/CapsuleCard';
 import CreateCapsuleModal from '../components/CreateCapsuleModal';
 import UnlockModal from '../components/UnlockModal';
 import CapsuleViewer from '../components/CapsuleViewer';
-import { Plus, LogOut, Search, Download, Upload } from 'lucide-react';
+import SettingsModal from '../components/SettingsModal';
+import { Plus, LogOut, Search, Download, Upload, Settings } from 'lucide-react';
 import { storage } from '../lib/storage';
 
 export default function Dashboard() {
@@ -17,6 +18,7 @@ export default function Dashboard() {
     const [viewData, setViewData] = useState<{ title: string; content: string } | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [showSettings, setShowSettings] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -206,6 +208,13 @@ export default function Dashboard() {
                     />
                     <div className="h-8 w-px bg-slate-200 mx-2"></div>
                     <button
+                        onClick={() => setShowSettings(true)}
+                        className="btn-premium btn-ghost text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+                    >
+                        <Settings className="w-4 h-4" />
+                        Settings
+                    </button>
+                    <button
                         onClick={logout}
                         className="btn-premium btn-ghost text-sm text-red-500 hover:text-red-600 hover:bg-red-50"
                     >
@@ -291,6 +300,10 @@ export default function Dashboard() {
                     onClose={() => setShowCreate(false)}
                     onSuccess={() => { setShowCreate(false); loadCapsules(); }}
                 />
+            )}
+
+            {showSettings && (
+                <SettingsModal onClose={() => setShowSettings(false)} />
             )}
 
             {selectedCapsule && !viewData && (

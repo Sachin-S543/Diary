@@ -11,7 +11,14 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const mockApi = {
     auth: {
-        async signup(data: { email: string; username: string; password: string }) {
+        async sendOtp(_email: string) {
+            await delay(300);
+            // In mock mode the OTP is always '123456'
+            console.info('[Mock] OTP code: 123456');
+            return { message: 'Mock OTP sent. Use code: 123456' };
+        },
+
+        async signup(data: { email: string; username: string; password: string; otpCode?: string }) {
             await delay(500);
             const users: User[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
 
@@ -26,8 +33,9 @@ const mockApi = {
                 id: crypto.randomUUID(),
                 username: data.username,
                 email: data.email,
-                passwordHash: 'mock_hash', // In local mode we don't really hash for security, just storage
+                passwordHash: 'mock_hash',
                 salt: 'mock_salt',
+                emailVerified: true,
                 createdAt: new Date().toISOString()
             };
 
@@ -128,8 +136,18 @@ const mockApi = {
             return { data: { success: true } };
         },
 
-        async update(_id: string, _updates: Partial<Capsule>) {
-            throw new Error("Update not implemented");
+        async getMeta() {
+            return { categories: [], tags: [] };
+        },
+
+        async update(id: string, updates: Partial<Capsule>) {
+            await delay(300);
+            let allCapsules: Capsule[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.CAPSULES) || '[]');
+            const idx = allCapsules.findIndex(c => c.id === id);
+            if (idx === -1) throw new Error('Entry not found');
+            allCapsules[idx] = { ...allCapsules[idx], ...updates, updatedAt: new Date().toISOString() };
+            localStorage.setItem(STORAGE_KEYS.CAPSULES, JSON.stringify(allCapsules));
+            return { data: allCapsules[idx] };
         }
     },
 };

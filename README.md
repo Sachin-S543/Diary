@@ -1,77 +1,68 @@
-# Secret Capsule 💊
-Check out the live version running on GitHub Pages: **[Launch Secret Capsule][def]**
+# Inkrypt 🖋️ — Private, End-to-End Encrypted Diary
 
-> **Note:** The demo runs in "Client-Only Mode". All data is stored securely in your browser's IndexedDB and is never sent to a server.
+Inkrypt is a premium, zero-knowledge personal diary application. It prioritizes absolute privacy, combining robust cryptographic primitives with a modern writing experience.
 
-## 🏗 Architecture
+Check out the web version (Client-Only Mode) [here](https://sachin-s543.github.io/Diary/).
 
-This project is a monorepo managed by **npm workspaces**:
+## 🌟 Features
 
-- **`apps/frontend`**: React + Vite + TypeScript application.
-- **`apps/server`**: Node.js + Express + TypeScript API.
-- **`packages/crypto-utils`**: Shared cryptographic primitives (WebCrypto API).
-- **`packages/types`**: Shared TypeScript interfaces.
-- **`packages/ui`**: Shared UI components and Tailwind configuration.
+- **Zero-Knowledge Architecture**: The server never sees your password or your notes.
+- **Argon2id Key Derivation**: Professional-grade hardening against brute-force attacks.
+- **AES-GCM-256 Encryption**: Industry-standard symmetric encryption for your diary entries.
+- **4KB Data Padding**: Mitigates "traffic analysis" by ensuring all encrypted blobs appear to be the same size.
+- **Rich Text Editor**: Powered by TipTap — headers, lists, links, blockquotes, and code formatting.
+- **Tags & Categories**: Organize your thoughts with a flexible meta-tagging system.
+- **Email OTP Verification**: Secure, multi-step signup process.
+- **Biometric Unlock**: Support for Windows Hello, Touch ID, or Face ID (WebAuthn).
+- **Tauri Native App**: High-performance, low-resource Windows desktop application.
+- **Offline Mode**: Access your encrypted cache even without an internet connection.
+
+## 🏗 Project Structure (Monorepo)
+
+- **`apps/frontend`**: React + Vite + TypeScript (Web & Tauri UI).
+- **`apps/server`**: Node.js + Express + PostgreSQL (Encrypted Blob Storage & Auth Gate).
+- **`packages/crypto-utils`**: Shared Argon2id and AES-GCM logic.
+- **`packages/types`**: Shared TypeScript contracts.
+- **`packages/ui`**: Shared UI components and Tailwind theme.
 
 ## 🚀 Getting Started
 
-### Prerequisites
+Follow the [PREREQUISITES.md](./PREREQUISITES.md) and [SETUP.md](./SETUP.md) for detailed, environment-specific instructions.
 
-- Node.js v18+
-- npm v9+
+### Quick Start (Development)
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/secret-capsule.git
-   cd secret-capsule
-   ```
-
-2. **Install dependencies**
+1. **Install dependencies**
    ```bash
    npm install
    ```
-
-3. **Start Development Server**
-   This command runs both the frontend and backend concurrently.
+2. **Setup environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your PostgreSQL and SMTP credentials.
+   ```
+3. **Run all services**
    ```bash
    npm run dev
    ```
-   - Frontend: [http://localhost:5173](http://localhost:5173)
-   - Backend: [http://localhost:3001](http://localhost:3001)
 
-### Build
+### Running the Desktop App
 
-To build all packages and applications for production:
+1. Ensure the backend is running.
+2. From `apps/frontend/`:
+   ```bash
+   npm run tauri:dev
+   ```
 
-```bash
-npm run build
-```
+## 📜 Documentation
 
-## 🔒 Security
-
-- **Encryption**: AES-GCM 256-bit encryption for data at rest.
-- **Key Derivation**: PBKDF2 (100,000 iterations) to derive encryption keys from your Diary Password.
-- **Transport**: All data must be transmitted over HTTPS (enforced in production).
-
-See [SECURITY.md](./SECURITY.md) and [THREAT_MODEL.md](./THREAT_MODEL.md) for deep dives.
-
-## 🎨 Design
-
-The UI follows a "Futuristic Glass" aesthetic. See [DESIGN.md](./DESIGN.md) for the design system and accessibility choices.
+- **[About Inkrypt](./ABOUT.md)** — Project mission and core philosophy.
+- **[Security Architecture](./SECURITY.md)** — Deep dive into our cryptographic model.
+- **[Threat Model](./THREAT_MODEL.md)** — Analysis of what Inkrypt protects against.
+- **[License](./LICENSE)** — GNU Affero General Public License v3 (AGPLv3).
 
 ## 🤝 Contributing
 
-1. Fork the repo
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions to privacy technology. All contributions must respect our AGPLv3 license and our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-
-[def]: https://sachin-s543.github.io/Diary/
+---
+*Your thoughts, inkrypted.*

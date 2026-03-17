@@ -8,6 +8,11 @@
         "build": "tsc"
     },
     "devDependencies": {
-        "typescript": "^5.0.0"
+        "@vitest/browser": "^4.1.0",
+        "typescript": "^5.0.0",
+        "vitest": "^4.1.0"
+    },
+    "dependencies": {
+        "hash-wasm": "^4.12.0"
     }
 }

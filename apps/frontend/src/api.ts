@@ -1,117 +1,95 @@
-import { Capsule } from '@secret-capsule/types';
-import mockApi from './mockApi';
+/*
+ * Inkrypt
+ * Copyright (C) 2025 Sachin-S543
+ * AGPL-3.0-or-later
+ */
 
-// Use environment variable or fallback to localhost
+import { Capsule } from '@secret-capsule/types';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
 
+// ─── Generic fetch helper ──────────────────────────────────────────────────
+async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+    const res = await fetch(`${API_URL}${path}`, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(err.message || `Request failed: ${res.status}`);
+    }
+    return res.json();
+}
+
+// ─── API ───────────────────────────────────────────────────────────────────
 const realApi = {
     auth: {
-        async signup(data: { email: string; username: string; password: string }) {
-            const response = await fetch(`${API_URL}/auth/signup`, {
+        sendOtp(email: string) {
+            return apiFetch<{ message: string }>('/auth/send-otp', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
+                body: JSON.stringify({ email }),
+            });
+        },
+
+        signup(data: { email: string; username: string; password: string; otpCode: string }) {
+            return apiFetch<{ user: any; token: string }>('/auth/signup', {
+                method: 'POST',
                 body: JSON.stringify(data),
             });
-            if (!response.ok) {
-                const error = await response.json();
-                const detailedMessage = error.errors
-                    ? error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')
-                    : error.message || 'Signup failed';
-                throw new Error(detailedMessage);
-            }
-            return await response.json();
         },
 
-        async login(data: { identifier: string; password: string }) {
-            const response = await fetch(`${API_URL}/auth/login`, {
+        login(data: { identifier: string; password: string }) {
+            return apiFetch<{ user: any; token: string }>('/auth/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
                 body: JSON.stringify(data),
             });
-            if (!response.ok) {
-                const error = await response.json();
-                const detailedMessage = error.errors
-                    ? error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')
-                    : error.message || 'Login failed';
-                throw new Error(detailedMessage);
-            }
-            return await response.json();
         },
 
-        async logout() {
-            const response = await fetch(`${API_URL}/auth/logout`, {
-                method: 'POST',
-                credentials: 'include',
-            });
-            if (!response.ok) {
-                throw new Error('Logout failed');
-            }
-            return await response.json();
+        logout() {
+            return apiFetch<{ message: string }>('/auth/logout', { method: 'POST' });
         },
 
-        async checkAuth() {
-            const response = await fetch(`${API_URL}/auth/me`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-            if (!response.ok) {
-                throw new Error('Not authenticated');
-            }
-            return await response.json();
+        checkAuth() {
+            return apiFetch<{ user: any }>('/auth/me');
         },
     },
 
     capsules: {
-        async getAll() {
-            const response = await fetch(`${API_URL}/capsules`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-            if (!response.ok) {
-                throw new Error('Failed to fetch capsules');
-            }
-            const data = await response.json();
-            return { data };
+        getAll(filters?: { category?: string; tag?: string }) {
+            const params = new URLSearchParams();
+            if (filters?.category) params.set('category', filters.category);
+            if (filters?.tag) params.set('tag', filters.tag);
+            const qs = params.toString();
+            return apiFetch<Capsule[]>(`/capsules${qs ? `?${qs}` : ''}`).then(data => ({ data }));
         },
 
-        async create(capsule: Omit<Capsule, 'createdAt' | 'updatedAt' | 'userId'>) {
-            const response = await fetch(`${API_URL}/capsules`, {
+        getMeta() {
+            return apiFetch<{ categories: string[]; tags: string[] }>('/capsules/meta');
+        },
+
+        create(capsule: Omit<Capsule, 'createdAt' | 'updatedAt' | 'userId'>) {
+            return apiFetch<Capsule>('/capsules', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
                 body: JSON.stringify(capsule),
-            });
-            if (!response.ok) {
-                const error = await response.json();
-                const detailedMessage = error.errors
-                    ? error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')
-                    : error.message || 'Failed to create capsule';
-                throw new Error(detailedMessage);
-            }
-            const data = await response.json();
-            return { data };
+            }).then(data => ({ data }));
         },
 
-        async delete(id: string) {
-            const response = await fetch(`${API_URL}/capsules/${id}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            });
-            if (!response.ok) {
-                throw new Error('Failed to delete capsule');
-            }
-            return { data: { success: true } };
+        update(id: string, capsule: Partial<Capsule>) {
+            return apiFetch<Capsule>(`/capsules/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(capsule),
+            }).then(data => ({ data }));
         },
 
-        async update(_id: string, _updates: Partial<Capsule>) {
-            throw new Error("Update not implemented");
-        }
+        delete(id: string) {
+            return apiFetch<{ success: boolean }>(`/capsules/${id}`, { method: 'DELETE' });
+        },
     },
 };
 
+// ─── Mock API (for dev without a server) ──────────────────────────────────
+import mockApi from './mockApi';
 const api = USE_MOCK ? mockApi : realApi;
-
 export default api;

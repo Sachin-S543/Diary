@@ -1,8 +1,8 @@
 {
-  "name": "secret-capsule-monorepo",
-  "version": "1.0.2",
+  "name": "inkrypt-monorepo",
+  "version": "1.0.0",
   "private": true,
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "author": "Sachin-S543",
   "repository": {
     "type": "git",
@@ -14,10 +14,10 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "dev": "concurrently \"npm run dev --workspace=@secret-capsule/server\" \"npm run dev --workspace=@secret-capsule/frontend\"",
+    "dev": "concurrently \"npm run dev --workspace=@inkrypt/server\" \"npm run dev --workspace=@inkrypt/frontend\"",
     "test": "npm run test --workspaces",
-    "lint": "npm run lint --workspace=@secret-capsule/frontend",
-    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules"
+    "lint": "npm run lint --workspace=@inkrypt/frontend",
+    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules dist"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.22",
@@ -28,5 +28,8 @@
     "prettier": "^3.0.0",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@tauri-apps/cli": "^2.10.1"
   }
 }

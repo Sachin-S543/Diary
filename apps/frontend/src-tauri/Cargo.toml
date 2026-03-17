@@ -1,0 +1,22 @@
+[package]
+name = "inkrypt"
+version = "1.0.0"
+description = "Inkrypt — Private Encrypted Diary"
+authors = ["Sachin-S543"]
+edition = "2021"
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/Sachin-S543/Diary"
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-shell = "2"
+open = "5"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
