@@ -9,7 +9,7 @@
         "test": "vitest run",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview",
-        "predeploy": "npm run build",
+        "predeploy": "npm run build && node -e \"require('fs').copyFileSync('dist/index.html', 'dist/404.html')\"",
         "deploy": "gh-pages -d dist"
     },
     "dependencies": {

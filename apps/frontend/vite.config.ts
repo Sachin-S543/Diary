@@ -5,7 +5,7 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-    base: mode === 'production' ? '/Diary/' : '/',
+    base: './',
     plugins: [react()],
     resolve: {
         alias: {
