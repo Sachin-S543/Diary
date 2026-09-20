@@ -2,11 +2,15 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "outDir": "./dist",
-        "rootDir": "./src",
+        "rootDirs": ["./src", "../../packages/types/src"],
         "noEmit": false,
         "declaration": true,
         "declarationMap": true,
-        "allowImportingTsExtensions": false
+        "allowImportingTsExtensions": false,
+        "baseUrl": ".",
+        "paths": {
+            "@secret-capsule/types": ["../../packages/types/src/index.ts"]
+        }
     },
     "include": [
         "src/**/*"
