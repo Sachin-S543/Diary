@@ -5,7 +5,8 @@
     "types": "./src/index.ts",
     "scripts": {
         "lint": "eslint .",
-        "build": "tsc"
+        "build": "tsc",
+        "test": "echo 'No tests in package'"
     },
     "peerDependencies": {
         "react": "^18.0.0",

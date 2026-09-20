@@ -4,9 +4,11 @@
     "scripts": {
         "dev": "tsx watch src/index.ts",
         "build": "tsc",
-        "start": "node dist/index.js"
+        "start": "node dist/index.js",
+        "test": "vitest run"
     },
     "dependencies": {
+        "@secret-capsule/types": "*",
         "@types/nodemailer": "^7.0.11",
         "bcryptjs": "^2.4.3",
         "cookie-parser": "^1.4.0",
@@ -29,6 +31,7 @@
         "@types/pg": "^8.10.9",
         "ts-node-dev": "^2.0.0",
         "tsx": "^4.20.6",
-        "typescript": "^5.0.0"
+        "typescript": "^5.0.0",
+        "vitest": "^1.0.0"
     }
 }

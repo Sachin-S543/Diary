@@ -1,3 +1,4 @@
+
 import CryptoWorker from '../workers/crypto.worker?worker';
 
 class CryptoBridge {
@@ -42,7 +43,7 @@ class CryptoBridge {
         });
     }
 
-    static async encrypt(data: string, key: CryptoKey): Promise<{ ciphertext: Uint8Array, iv: Uint8Array }> {
+    static async encrypt(data: string, key: CryptoKey, aad?: Uint8Array): Promise<{ ciphertext: Uint8Array, iv: Uint8Array }> {
         return new Promise((resolve, reject) => {
             const worker = new CryptoWorker();
             worker.onmessage = (e) => {
@@ -54,11 +55,11 @@ class CryptoBridge {
                     worker.terminate();
                 }
             };
-            worker.postMessage({ type: 'ENCRYPT', payload: { data, key } });
+            worker.postMessage({ type: 'ENCRYPT', payload: { data, key, aad } });
         });
     }
 
-    static async decrypt(iv: Uint8Array, data: Uint8Array, key: CryptoKey): Promise<string> {
+    static async decrypt(iv: Uint8Array, data: Uint8Array, key: CryptoKey, aad?: Uint8Array): Promise<string> {
         return new Promise((resolve, reject) => {
             const worker = new CryptoWorker();
             worker.onmessage = (e) => {
@@ -70,7 +71,66 @@ class CryptoBridge {
                     worker.terminate();
                 }
             };
-            worker.postMessage({ type: 'DECRYPT', payload: { iv, data, key } });
+            worker.postMessage({ type: 'DECRYPT', payload: { iv, data, key, aad } });
+        });
+    }
+
+    static async generateVmk(extractable: boolean = true): Promise<{ vmkKey: CryptoKey; rawVmkBytes: Uint8Array }> {
+        return new Promise((resolve, reject) => {
+            const worker = new CryptoWorker();
+            worker.onmessage = (e) => {
+                if (e.data.type === 'VMK_GENERATED') {
+                    resolve(e.data.payload);
+                    worker.terminate();
+                } else if (e.data.type === 'ERROR') {
+                    reject(new Error(e.data.payload));
+                    worker.terminate();
+                }
+            };
+            worker.postMessage({ type: 'GENERATE_VMK', payload: { extractable } });
+        });
+    }
+
+    static async wrapVmk(vmkBytes: Uint8Array, wrappingKey: CryptoKey, aad?: Uint8Array): Promise<{ encryptedVmk: Uint8Array; iv: Uint8Array }> {
+        return new Promise((resolve, reject) => {
+            const worker = new CryptoWorker();
+            worker.onmessage = (e) => {
+                if (e.data.type === 'VMK_WRAPPED') {
+                    resolve(e.data.payload);
+                    worker.terminate();
+                } else if (e.data.type === 'ERROR') {
+                    reject(new Error(e.data.payload));
+                    worker.terminate();
+                }
+            };
+            worker.postMessage({ type: 'WRAP_VMK', payload: { vmkBytes, wrappingKey, aad } });
+        });
+    }
+
+    static async unwrapVmk(vmkIv: Uint8Array, encryptedVmk: Uint8Array, wrappingKey: CryptoKey, aad?: Uint8Array): Promise<CryptoKey> {
+        return new Promise((resolve, reject) => {
+            const worker = new CryptoWorker();
+            worker.onmessage = (e) => {
+                if (e.data.type === 'VMK_UNWRAPPED') {
+                    resolve(e.data.payload);
+                    worker.terminate();
+                } else if (e.data.type === 'ERROR') {
+                    reject(new Error(e.data.payload));
+                    worker.terminate();
+                }
+            };
+            worker.postMessage({ type: 'UNWRAP_VMK', payload: { vmkIv, encryptedVmk, wrappingKey, aad } });
+        });
+    }
+
+    static async purgeMemory(): Promise<void> {
+        return new Promise((resolve) => {
+            const worker = new CryptoWorker();
+            worker.onmessage = () => {
+                worker.terminate();
+                resolve();
+            };
+            worker.postMessage({ type: 'PURGE_MEMORY' });
         });
     }
 }

@@ -5,7 +5,8 @@
     "types": "./src/index.ts",
     "scripts": {
         "lint": "eslint .",
-        "build": "tsc"
+        "build": "tsc",
+        "test": "vitest run"
     },
     "devDependencies": {
         "@vitest/browser": "^4.1.0",
@@ -13,6 +14,7 @@
         "vitest": "^4.1.0"
     },
     "dependencies": {
+        "@secret-capsule/types": "*",
         "hash-wasm": "^4.12.0"
     }
 }

@@ -113,6 +113,12 @@ export default function Dashboard() {
         reader.readAsText(file);
     };
 
+    const handleSignOut = async () => {
+        setSelectedCapsule(null);
+        setViewData(null);
+        await logout();
+    };
+
     return (
         <div className="flex h-screen bg-inkrypt-main overflow-hidden">
             {/* Mobile Sidebar Toggle */}
@@ -170,7 +176,7 @@ export default function Dashboard() {
                         <div onClick={() => setShowSettings(true)} className="sidebar-link">
                             <Settings className="w-5 h-5" /> Settings
                         </div>
-                        <div onClick={logout} className="sidebar-link text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                        <div onClick={handleSignOut} className="sidebar-link text-rose-500 hover:bg-rose-50 hover:text-rose-600">
                             <LogOut className="w-5 h-5" /> Sign Out
                         </div>
                         

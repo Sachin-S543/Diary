@@ -90,7 +90,7 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
                 }
             } catch (err) {
                 console.error(err);
-                setError(mode === 'password' ? 'Decryption failed. Incorrect password.' : 'Invalid Recovery Key.');
+                setError(mode === 'password' ? 'Decryption failed. Incorrect Diary Password.' : 'Decryption failed. Invalid Vault Recovery Key.');
             } finally {
                 setLoading(false);
             }
@@ -127,18 +127,18 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
                     </h2>
 
                     {isPasswordProtected && (
-                        <div className="flex justify-center gap-6 mt-6 text-sm font-medium">
+                        <div className="flex justify-center gap-4 mt-6 text-xs font-semibold">
                             <button
                                 onClick={() => { setMode('password'); setError(''); }}
                                 className={`pb-2 border-b-2 transition-all ${mode === 'password' ? `${theme.text} border-current` : 'text-slate-400 border-transparent hover:text-slate-600'}`}
                             >
-                                Password
+                                Diary Password
                             </button>
                             <button
                                 onClick={() => { setMode('recovery'); setError(''); }}
                                 className={`pb-2 border-b-2 transition-all ${mode === 'recovery' ? `${theme.text} border-current` : 'text-slate-400 border-transparent hover:text-slate-600'}`}
                             >
-                                Recovery Key
+                                Vault Recovery Key
                             </button>
                         </div>
                     )}
@@ -169,7 +169,7 @@ export default function UnlockModal({ capsule, onClose, onUnlock }: UnlockModalP
                             <div className="relative">
                                 <textarea
                                     className="input-premium text-sm font-mono px-4 py-3 w-full h-32 resize-none"
-                                    placeholder="Paste your 64-character recovery key..."
+                                    placeholder="Paste your 46-character vault recovery key..."
                                     value={recoveryKey}
                                     onChange={(e) => setRecoveryKey(e.target.value)}
                                     autoFocus

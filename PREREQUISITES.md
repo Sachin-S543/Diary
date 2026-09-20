@@ -15,15 +15,6 @@ Inkrypt uses a relational database for user metadata and encrypted blob storage.
 - **PostgreSQL**: v14.0 or higher.
 - **Environment**: Your `DATABASE_URL` in `.env` must be accessible during the server startup.
 
-## 🟠 Desktop Development (Tauri v2)
-Required for building and running the native Windows desktop application.
-
-- **Rust**: Latest stable version via [rustup.rs](https://rustup.rs/).
-- **Windows Features**:
-  - **C++ Build Tools**: Use "Desktop development with C++" in the Visual Studio Installer.
-  - **WebView2 SDK**: Usually pre-installed on Windows 11; required for Windows 10.
-- **Cargo Plugins**: `tauri-build` and `tauri-cli` (installed automatically during `npm run tauri:dev`).
-
 ## 🔐 Security Configuration
 Necessary for encryption and authentication features.
 
@@ -42,19 +33,10 @@ Necessary for encryption and authentication features.
 
 ---
 
-### Installing Rust on Windows (PowerShell)
-```powershell
-# Install rustup
-winget install Rustlang.Rustup
-# Update and add targets
-rustup update
-rustup target add x86_64-pc-windows-msvc
-```
-
 ### Checking your environment
 ```bash
 node --version
 npm --version
 psql --version
-rustc --version
 ```
+

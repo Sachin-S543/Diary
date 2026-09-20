@@ -21,9 +21,83 @@ export interface EncryptedContent {
     hmac: string;
 }
 
-export * from './kdf';
-export * from './encryptedStore';
-export * from './attachmentCrypto';
+export * from './kdf.js';
+export * from './encryptedStore.js';
+export * from './v3Vault.js';
+export * from './v3Capsule.js';
+export * from './v3Migration.js';
+
+// ─── V3 Base64URL & Recovery Key Utilities ──────────────────────────────────
+
+export const toBase64Url = (buffer: ArrayBuffer | Uint8Array): string => {
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+};
+
+export const fromBase64Url = (base64url: string): Uint8Array => {
+    let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4 !== 0) {
+        base64 += '=';
+    }
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+};
+
+export const formatRecoveryKeyV3 = (rawBytes: Uint8Array): string => {
+    if (rawBytes.byteLength !== 32) {
+        throw new Error(`Invalid recovery key byte length: expected 32, got ${rawBytes.byteLength}`);
+    }
+    const b64url = toBase64Url(rawBytes); // Dynamically calculated 43 chars
+    // Format into 4 hyphenated blocks: 11-11-11-10 (total 43 chars + 3 hyphens = 46 chars)
+    return `${b64url.slice(0, 11)}-${b64url.slice(11, 22)}-${b64url.slice(22, 33)}-${b64url.slice(33)}`;
+};
+
+export const parseRecoveryKeyV3 = (input: string): Uint8Array => {
+    const trimmed = input.trim();
+    let cleaned = trimmed;
+    if (trimmed.length === 46 && trimmed[11] === '-' && trimmed[23] === '-' && trimmed[35] === '-') {
+        cleaned = trimmed.slice(0, 11) + trimmed.slice(12, 23) + trimmed.slice(24, 35) + trimmed.slice(36);
+    } else if (trimmed.length !== 43) {
+        // Fallback for user input with whitespace/hyphens around blocks
+        cleaned = trimmed.replace(/\s+/g, '');
+        if (cleaned.length === 46 && cleaned[11] === '-' && cleaned[23] === '-' && cleaned[35] === '-') {
+            cleaned = cleaned.slice(0, 11) + cleaned.slice(12, 23) + cleaned.slice(24, 35) + cleaned.slice(36);
+        }
+    }
+
+    if (cleaned.length !== 43) {
+        throw new Error(`Invalid V3 Recovery Key length: expected 43 unpadded Base64URL characters, got ${cleaned.length}`);
+    }
+    const bytes = fromBase64Url(cleaned);
+    if (bytes.byteLength !== 32) {
+        throw new Error(`Invalid V3 Recovery Key byte size: expected 32 bytes, got ${bytes.byteLength}`);
+    }
+    return bytes;
+};
+
+export const buildAadV3 = (domain: 'vmk' | 'capsule_key' | 'payload', resourceId: string): Uint8Array => {
+    return enc.encode(`inkrypt:${domain}:v3:${resourceId}`);
+};
+
+export const zeroBuffer = (buffer: Uint8Array | ArrayBuffer): void => {
+    if (buffer instanceof Uint8Array) {
+        buffer.fill(0);
+    } else {
+        new Uint8Array(buffer).fill(0);
+    }
+};
+
 
 // 1. Generate Random Salt (128-bit)
 export const generateSalt = (): string => {

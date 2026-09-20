@@ -19,10 +19,25 @@
         "strict": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true
+        "noFallthroughCasesInSwitch": true,
+        "baseUrl": ".",
+        "paths": {
+            "@secret-capsule/types": [
+                "../../packages/types/src/index.ts"
+            ],
+            "@secret-capsule/crypto-utils": [
+                "../../packages/crypto-utils/src/index.ts"
+            ],
+            "@secret-capsule/ui": [
+                "../../packages/ui/src/index.ts"
+            ]
+        }
     },
     "include": [
-        "src"
+        "src",
+        "../../packages/types/src",
+        "../../packages/crypto-utils/src",
+        "../../packages/ui/src"
     ],
     "references": [
         {

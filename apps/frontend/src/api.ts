@@ -34,14 +34,14 @@ const realApi = {
         },
 
         signup(data: { email: string; username: string; password: string; otpCode: string }) {
-            return apiFetch<{ user: any; token: string }>('/auth/signup', {
+            return apiFetch<{ user: any }>('/auth/signup', {
                 method: 'POST',
                 body: JSON.stringify(data),
             });
         },
 
         login(data: { identifier: string; password: string }) {
-            return apiFetch<{ user: any; token: string }>('/auth/login', {
+            return apiFetch<{ user: any }>('/auth/login', {
                 method: 'POST',
                 body: JSON.stringify(data),
             });
@@ -53,6 +53,18 @@ const realApi = {
 
         checkAuth() {
             return apiFetch<{ user: any }>('/auth/me');
+        },
+
+        getSessions() {
+            return apiFetch<any[]>('/auth/sessions');
+        },
+
+        revokeSession(id: string) {
+            return apiFetch<{ message: string }>(`/auth/sessions/${id}`, { method: 'DELETE' });
+        },
+
+        revokeAllOtherSessions() {
+            return apiFetch<{ message: string }>('/auth/sessions', { method: 'DELETE' });
         },
     },
 
@@ -89,7 +101,4 @@ const realApi = {
     },
 };
 
-// ─── Mock API (for dev without a server) ──────────────────────────────────
-import mockApi from './mockApi';
-const api = USE_MOCK ? mockApi : realApi;
-export default api;
+export default realApi;

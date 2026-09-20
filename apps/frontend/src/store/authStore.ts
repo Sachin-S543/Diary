@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { SafeUser } from '@secret-capsule/types';
 import api from '../api';
+import { useCryptoStore } from './cryptoStore';
+import { encryptedCache } from '../lib/storage';
 
 interface AuthState {
     user: SafeUser | null;
@@ -19,6 +21,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     logout: async () => {
         try {
             await api.auth.logout();
+        } catch (e) {
+            console.error(e);
+        }
+        useCryptoStore.getState().clearAllKeys();
+        try {
+            await encryptedCache.purgeAllLocalCache();
         } catch (e) {
             console.error(e);
         }

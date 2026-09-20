@@ -19,7 +19,7 @@ const createTransport = () => {
     const from = process.env.SMTP_FROM || `noreply@${process.env.APP_DOMAIN || 'inkrypt.app'}`;
 
     if (!host || !user || !pass) {
-        console.warn('[Email] SMTP not configured — emails will be logged to console only');
+        console.warn('[Email] SMTP not configured — email transport suppressed.');
         return null;
     }
 
@@ -83,12 +83,7 @@ export const sendOtpEmail = async (to: string, code: string): Promise<void> => {
 </html>`;
 
     if (!config) {
-        // Dev mode fallback — print to console
-        console.log(`\n========= OTP EMAIL (console fallback) =========`);
-        console.log(`To: ${to}`);
-        console.log(`Subject: ${subject}`);
-        console.log(`Code: ${code}`);
-        console.log(`================================================\n`);
+        console.log(`[Email] SMTP unconfigured. Verification email dispatch suppressed.`);
         return;
     }
 

@@ -159,9 +159,9 @@ export default function CreateCapsuleModal({ onClose, onSuccess }: CreateCapsule
 
                     {usePassword && (
                         <div className="bg-slate-900 p-5 rounded-xl border border-slate-800 mb-8 shadow-inner">
-                            <h3 className="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-2">Recovery Key</h3>
+                            <h3 className="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-2">Vault Recovery Key</h3>
                             <p className="text-sm text-slate-300 mb-3 leading-relaxed">
-                                <strong>Save this key!</strong> It is the <span className="text-rose-400 font-bold">ONLY</span> way to recover your capsule if you forget the password.
+                                <strong>Save this key!</strong> It is your 46-character <span className="text-rose-400 font-bold">Vault Recovery Key</span> used to unwrap your vault master key if you forget your Diary Password.
                             </p>
                             <div className="relative group">
                                 <code className="block bg-black/30 p-4 rounded-lg text-emerald-400 text-xs break-all font-mono border border-emerald-500/20 group-hover:border-emerald-500/40 transition-colors">

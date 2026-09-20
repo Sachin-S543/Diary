@@ -6,10 +6,12 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Lock, Shield, Key, Server, Eye, EyeOff,
     Download, ChevronDown, Github,
-    RefreshCw, Fingerprint, Database, FileText
+    RefreshCw, Fingerprint, Database,
+    ArrowRight
 } from 'lucide-react';
 
 // ─── Sub-components ────────────────────────────────────────────────────────
@@ -17,62 +19,60 @@ import {
 function NavBar() {
     const [open, setOpen] = useState(false);
     return (
-        <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
-            <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-                <a href="#top" className="flex items-center gap-2.5">
-                    <InkryptLogo size={32} />
-                    <span className="text-lg font-bold text-slate-900 tracking-tight">Inkrypt</span>
+        <nav className="fixed top-4 inset-x-4 md:inset-x-auto md:top-6 md:left-1/2 md:-translate-x-1/2 z-50 md:w-[800px] bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl">
+            <div className="px-6 h-14 flex items-center justify-between">
+                <a href="#top" className="flex items-center gap-2.5 group">
+                    <InkryptLogo size={28} />
+                    <span className="text-lg font-bold text-white tracking-tight group-hover:text-indigo-400 transition-colors">Inkrypt</span>
                 </a>
 
                 {/* Desktop nav */}
-                <div className="hidden md:flex items-center gap-8 text-sm text-slate-600">
-                    <a href="#how-it-works" className="hover:text-slate-900 transition-colors">How it works</a>
-                    <a href="#security" className="hover:text-slate-900 transition-colors">Security</a>
-                    <a href="#recovery" className="hover:text-slate-900 transition-colors">Recovery</a>
-                    <a href="#faq" className="hover:text-slate-900 transition-colors">FAQ</a>
-                    <a
-                        href="https://github.com/Sachin-S543/Diary"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 hover:text-slate-900 transition-colors"
-                    >
-                        <Github className="w-4 h-4" /> Source
-                    </a>
+                <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+                    <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
+                    <a href="#security" className="hover:text-white transition-colors">Security</a>
+                    <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
                 </div>
 
-                <div className="hidden md:flex items-center gap-3">
-                    <Link to="/auth" className="text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors">Sign in</Link>
+                <div className="hidden md:flex items-center gap-4">
+                    <Link to="/auth" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Log in</Link>
                     <Link
                         to="/auth?mode=signup"
-                        className="text-sm font-semibold px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-700 transition-colors"
+                        className="text-sm font-semibold px-4 py-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-400 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-[0_0_25px_rgba(99,102,241,0.5)]"
                     >
-                        Get started free
+                        Get Started
                     </Link>
                 </div>
 
                 {/* Mobile hamburger */}
-                <button className="md:hidden p-2" onClick={() => setOpen(!open)} aria-label="Menu">
-                    <div className="w-5 h-0.5 bg-slate-700 mb-1 transition-all" />
-                    <div className="w-5 h-0.5 bg-slate-700 mb-1 transition-all" />
-                    <div className="w-5 h-0.5 bg-slate-700 transition-all" />
+                <button className="md:hidden p-2 text-slate-300 hover:text-white" onClick={() => setOpen(!open)} aria-label="Menu">
+                    <div className={`w-5 h-0.5 bg-current mb-1.5 transition-all ${open ? 'rotate-45 translate-y-2' : ''}`} />
+                    <div className={`w-5 h-0.5 bg-current mb-1.5 transition-all ${open ? 'opacity-0' : ''}`} />
+                    <div className={`w-5 h-0.5 bg-current transition-all ${open ? '-rotate-45 -translate-y-2' : ''}`} />
                 </button>
             </div>
 
-            {open && (
-                <div className="md:hidden border-t border-slate-100 bg-white px-6 py-4 space-y-3">
-                    {['#how-it-works', '#security', '#recovery', '#faq'].map(h => (
-                        <a key={h} href={h} onClick={() => setOpen(false)} className="block text-sm text-slate-600 hover:text-slate-900">
-                            {h.replace('#', '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                        </a>
-                    ))}
-                    <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
-                        <Link to="/auth" className="text-sm font-medium text-slate-700 text-center py-2">Sign in</Link>
-                        <Link to="/auth?mode=signup" className="text-sm font-semibold text-center py-2 bg-slate-900 text-white rounded-lg">
-                            Get started free
-                        </Link>
-                    </div>
-                </div>
-            )}
+            <AnimatePresence>
+                {open && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="md:hidden border-t border-white/10 bg-slate-900/90 backdrop-blur-3xl px-6 py-6 space-y-4 rounded-b-2xl absolute top-full left-0 right-0 mt-2 shadow-2xl"
+                    >
+                        {['#how-it-works', '#security', '#recovery', '#faq'].map(h => (
+                            <a key={h} href={h} onClick={() => setOpen(false)} className="block text-base font-medium text-slate-300 hover:text-white">
+                                {h.replace('#', '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                            </a>
+                        ))}
+                        <div className="flex flex-col gap-3 pt-4 border-t border-white/10">
+                            <Link to="/auth" className="text-base font-medium text-slate-300 py-2 text-center" onClick={() => setOpen(false)}>Log in</Link>
+                            <Link to="/auth?mode=signup" className="text-base font-semibold text-center py-3 bg-indigo-500 text-white rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.3)]" onClick={() => setOpen(false)}>
+                                Get Started Free
+                            </Link>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </nav>
     );
 }
@@ -80,56 +80,142 @@ function NavBar() {
 function InkryptLogo({ size = 40 }: { size?: number }) {
     return (
         <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Inkrypt logo">
-            <rect width="40" height="40" rx="10" fill="#0f172a" />
+            <rect width="40" height="40" rx="10" fill="url(#logo-grad)" />
             {/* Lock body */}
-            <rect x="12" y="20" width="16" height="12" rx="3" fill="#e2e8f0" />
+            <rect x="12" y="20" width="16" height="12" rx="3" fill="#ffffff" />
             {/* Lock shackle */}
-            <path d="M15 20V16a5 5 0 0 1 10 0v4" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M15 20V16a5 5 0 0 1 10 0v4" stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round" />
             {/* Keyhole */}
             <circle cx="20" cy="25" r="2" fill="#0f172a" />
             <rect x="19" y="25" width="2" height="3" rx="1" fill="#0f172a" />
             {/* Ink drop accent */}
-            <circle cx="30" cy="11" r="3" fill="#6366f1" />
-            <path d="M30 8.5 L30 5" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="30" cy="11" r="3" fill="#10b981" />
+            <path d="M30 8.5 L30 5" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" />
+            <defs>
+                <linearGradient id="logo-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#1e1b4b" />
+                    <stop offset="1" stopColor="#312e81" />
+                </linearGradient>
+            </defs>
         </svg>
     );
 }
 
 function Hero() {
     return (
-        <section id="top" className="pt-20 pb-24 px-6 text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-700 text-xs font-semibold mb-8 uppercase tracking-wider">
-                <Lock className="w-3 h-3" /> Zero-knowledge · End-to-end encrypted · Open source
+        <section id="top" className="relative pt-40 pb-32 px-6 text-center overflow-hidden">
+            {/* Ambient Background */}
+            <div className="absolute inset-0 pointer-events-none -z-10">
+                <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen animate-float" />
+                <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-emerald-600/10 rounded-full blur-[100px] mix-blend-screen animate-float" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(ellipse_at_center,transparent_0%,#020617_80%)]" />
             </div>
 
-            <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight mb-6">
-                Your diary.<br />
-                <span className="text-indigo-600">Fully encrypted.</span><br />
-                Always yours.
-            </h1>
-
-            <p className="text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Inkrypt is a private, end-to-end encrypted diary. Your entries are scrambled on your device before anything touches a server — nobody, not even us, can read your words.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                    to="/auth?mode=signup"
-                    className="px-8 py-3.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-700 transition-colors text-sm shadow-lg"
+            <div className="max-w-4xl mx-auto z-10 relative">
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/50 backdrop-blur-md border border-slate-700/50 rounded-full text-slate-300 text-xs font-semibold mb-8 uppercase tracking-widest"
                 >
-                    Start writing — it's free
-                </Link>
-                <a
-                    href="#how-it-works"
-                    className="px-8 py-3.5 bg-white text-slate-700 font-semibold rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-sm"
+                    <Lock className="w-3.5 h-3.5 text-emerald-400" /> Digital Bunker Architecture
+                </motion.div>
+
+                <motion.h1 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1 }}
+                    className="text-5xl md:text-7xl font-black text-white tracking-tight leading-[1.1] mb-6"
                 >
-                    See how it works
-                </a>
+                    Your thoughts.<br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">
+                        Fully encrypted.
+                    </span><br />
+                    Always yours.
+                </motion.h1>
+
+                <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed font-body"
+                >
+                    Inkrypt is a client-side encrypted personal diary. Your entries are encrypted on your device before being synchronized. Only you possess the decryption keys.
+                </motion.p>
+
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="flex flex-col sm:flex-row items-center justify-center gap-4"
+                >
+                    <Link
+                        to="/auth?mode=signup"
+                        className="w-full sm:w-auto px-8 py-4 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-200 transition-all text-sm shadow-[0_0_30px_rgba(255,255,255,0.15)] flex items-center justify-center gap-2 group"
+                    >
+                        Start Encrypted Diary
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                    <a
+                        href="#how-it-works"
+                        className="w-full sm:w-auto px-8 py-4 bg-slate-900/80 text-white font-bold rounded-xl hover:bg-slate-800 transition-all text-sm border border-slate-800"
+                    >
+                        How It Works
+                    </a>
+                </motion.div>
+
+                <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1, delay: 0.8 }}
+                    className="mt-8 text-xs font-semibold text-slate-500 uppercase tracking-widest"
+                >
+                    Open Source (AGPLv3) • Zero Tracking • Trustless
+                </motion.p>
             </div>
+        </section>
+    );
+}
 
-            <p className="mt-6 text-xs text-slate-400">
-                Open source under AGPLv3 · No ads · No tracking · No analytics
-            </p>
+function FeaturesGrid() {
+    const features = [
+        {
+            icon: <Shield className="w-6 h-6 text-indigo-400" />,
+            title: 'Vault Master Key Architecture',
+            description: 'Your diary entries are protected using AES-256 GCM envelope encryption under a 256-bit Vault Master Key (VMK).',
+        },
+        {
+            icon: <Key className="w-6 h-6 text-emerald-400" />,
+            title: 'Dual-Wrapped VMK',
+            description: 'Your VMK is wrapped by both your Diary Password and an independent 46-character Vault Recovery Key.',
+        },
+        {
+            icon: <Lock className="w-6 h-6 text-indigo-400" />,
+            title: 'Argon2id Key Derivation',
+            description: 'Wrapping keys are derived locally using Argon2id with dedicated salt and 64MB memory cost.',
+        },
+        {
+            icon: <Server className="w-6 h-6 text-emerald-400" />,
+            title: 'Client-Side Encrypted Sync',
+            description: 'PostgreSQL and Google Drive store only encrypted vault headers and encrypted capsule blobs.',
+        },
+    ];
+
+    return (
+        <section id="features" className="py-24 px-6 relative z-10 bg-slate-950/50">
+            <div className="max-w-6xl mx-auto">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {features.map((f, i) => (
+                        <div key={i} className="p-8 rounded-3xl bg-slate-900/40 border border-slate-800/60 hover:border-slate-700 transition-colors">
+                            <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center mb-6">
+                                {f.icon}
+                            </div>
+                            <h3 className="font-bold text-white mb-2 text-lg">{f.title}</h3>
+                            <p className="text-sm text-slate-400 leading-relaxed font-body">{f.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </section>
     );
 }
@@ -137,42 +223,41 @@ function Hero() {
 function HowItWorks() {
     const steps = [
         {
-            icon: <Key className="w-6 h-6 text-indigo-600" />,
-            title: 'You set a Diary Password',
-            description:
-                'When you create an account, you choose a Diary Password that never leaves your device. This is separate from your login password — the server never sees it.',
+            icon: <Key className="w-6 h-6 text-indigo-400" />,
+            title: '1. Vault Initialization',
+            description: 'Your browser generates a 256-bit VMK and dual-wraps it with your Diary Password and a 46-character Vault Recovery Key.',
         },
         {
-            icon: <Lock className="w-6 h-6 text-indigo-600" />,
-            title: 'Your device encrypts everything',
-            description:
-                'Before any entry is saved, your browser runs Argon2id to derive a 256-bit AES-GCM encryption key from your Diary Password. The entry is encrypted locally, then uploaded as an unreadable blob.',
+            icon: <Lock className="w-6 h-6 text-emerald-400" />,
+            title: '2. Local Envelope Encryption',
+            description: 'Each entry is encrypted locally under a per-capsule key wrapped by your VMK before leaving client memory.',
         },
         {
-            icon: <Server className="w-6 h-6 text-indigo-600" />,
-            title: 'The server only stores ciphertext',
-            description:
-                'Our server stores your encrypted data and your login credentials (bcrypt hash). It has zero access to your Diary Password or any decryption key. Even a full database breach exposes nothing readable.',
+            icon: <Database className="w-6 h-6 text-slate-300" />,
+            title: '3. Encrypted Synchronization',
+            description: 'Encrypted capsule blobs are synchronized to PostgreSQL and optional Google Drive appDataFolder.',
         },
     ];
 
     return (
-        <section id="how-it-works" className="py-20 px-6 bg-slate-50 border-y border-slate-100">
-            <div className="max-w-5xl mx-auto">
-                <h2 className="text-3xl font-bold text-slate-900 text-center mb-4">How it works</h2>
-                <p className="text-slate-500 text-center mb-14 max-w-xl mx-auto">
-                    Three simple steps — all the hard crypto happens silently in the background.
-                </p>
+        <section id="how-it-works" className="py-24 px-6 relative z-10 bg-slate-950">
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-800 to-transparent" />
+            <div className="max-w-6xl mx-auto">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-4xl font-black text-white mb-6">The Cryptography Loop</h2>
+                    <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+                        Client-side envelope encryption means your encryption keys remain on your device. All cryptographic operations take place locally.
+                    </p>
+                </div>
 
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-3 gap-6">
                     {steps.map((step, i) => (
-                        <div key={i} className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-                            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mb-4">
+                        <div key={i} className="bg-slate-900/50 backdrop-blur-xl border border-white/5 rounded-3xl p-8 hover:bg-slate-900 transition-colors hover:border-white/10 group">
+                            <div className="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-white/5 group-hover:ring-indigo-500/30 transition-all shadow-lg">
                                 {step.icon}
                             </div>
-                            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 block">Step {i + 1}</span>
-                            <h3 className="text-lg font-semibold text-slate-900 mb-3">{step.title}</h3>
-                            <p className="text-sm text-slate-500 leading-relaxed">{step.description}</p>
+                            <h3 className="text-xl font-bold text-white mb-4">{step.title}</h3>
+                            <p className="text-slate-400 leading-relaxed font-body">{step.description}</p>
                         </div>
                     ))}
                 </div>
@@ -184,79 +269,62 @@ function HowItWorks() {
 function SecuritySection() {
     const protections = [
         {
-            icon: <Shield className="w-5 h-5" />,
+            icon: <Shield className="w-5 h-5 text-indigo-400" />,
             title: 'Argon2id Key Derivation',
-            description: 'Your Diary Password is never used directly. Argon2id (64 MB memory cost, 3 iterations) derives a strong 256-bit key. This makes brute-force attacks — including GPU and ASIC attacks — extremely costly.',
+            description: 'Your password is hammered with 64MB of memory cost and 3 iterations to derive a 256-bit key, severely punishing ASIC and GPU brute-force attacks.',
         },
         {
-            icon: <Lock className="w-5 h-5" />,
-            title: 'AES-GCM 256-bit Encryption',
-            description: 'Every entry is encrypted with AES-GCM using a unique 12-byte random IV. AES-GCM provides authenticated encryption, meaning any tampering is detected before decryption.',
+            icon: <Lock className="w-5 h-5 text-emerald-400" />,
+            title: 'AES-GCM Authenticated Encryption',
+            description: 'Every entry is encrypted with a unique 12-byte IV and tied with a MAC. An attacker cannot tamper with or silently modify your ciphertext.',
         },
         {
-            icon: <Eye className="w-5 h-5" />,
-            title: '4 KB Padding — Size Anonymity',
-            description: 'All entries are padded to 4 KB boundaries (ISO/IEC 7816-4) before encryption. An attacker watching the database cannot guess entry length or content type from blob size.',
+            icon: <EyeOff className="w-5 h-5 text-slate-300" />,
+            title: '4 KB Padding (ISO/IEC 7816-4)',
+            description: 'We pad all entries to 4KB boundaries before encryption. An adversary analyzing network traffic cannot guess the content based on block size.',
         },
         {
-            icon: <Fingerprint className="w-5 h-5" />,
-            title: 'WebAuthn Biometric Unlock',
-            description: 'Enable Windows Hello, Touch ID, or Face ID to unlock your vault without typing your Diary Password. Hardware-backed key protection via the WebAuthn PRF extension.',
+            icon: <Fingerprint className="w-5 h-5 text-indigo-400" />,
+            title: 'WebAuthn Hardware Unlock',
+            description: 'Unlock your vault using Windows Hello, Touch ID, or FaceID. True hardware-backed key protection using the WebAuthn PRF extension.',
         },
         {
-            icon: <Database className="w-5 h-5" />,
-            title: 'Encrypted Local Cache',
-            description: 'The browser IndexedDB cache is fully encrypted — every record, setting, and metadata item is encrypted with your derived key before being written to disk.',
+            icon: <Database className="w-5 h-5 text-emerald-400" />,
+            title: 'Local Encrypted Cache',
+            description: 'The local IndexedDB cache stores encrypted V3 vault headers and capsule blobs. Plaintext keys are never persisted.',
         },
         {
-            icon: <EyeOff className="w-5 h-5" />,
-            title: 'Zero-Knowledge Architecture',
-            description: 'Your Diary Password and all derived keys exist only in memory during an active session. They are never stored in localStorage, sessionStorage, cookies, or any persistent storage.',
+            icon: <Eye className="w-5 h-5 text-slate-300" />,
+            title: 'Ephemeral Key Architecture',
+            description: 'Derived keys exist solely in memory. They are never committed to localStorage, sessionStorage, or cookies. Close the tab, the key is destroyed.',
         },
     ];
 
     return (
-        <section id="security" className="py-20 px-6">
-            <div className="max-w-5xl mx-auto">
-                <h2 className="text-3xl font-bold text-slate-900 text-center mb-4">Security, explained plainly</h2>
-                <p className="text-slate-500 text-center mb-14 max-w-xl mx-auto">
-                    We use well-established open standards — nothing custom, nothing clever. Here's exactly what protects your data.
-                </p>
-
-                <div className="grid md:grid-cols-2 gap-5">
-                    {protections.map((p, i) => (
-                        <div key={i} className="flex gap-4 p-5 rounded-2xl border border-slate-100 bg-white hover:border-indigo-100 hover:shadow-sm transition-all">
-                            <div className="w-9 h-9 flex-shrink-0 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600">
-                                {p.icon}
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-slate-900 mb-1 text-sm">{p.title}</h3>
-                                <p className="text-sm text-slate-500 leading-relaxed">{p.description}</p>
-                            </div>
+        <section id="security" className="py-24 px-6 bg-[#020617] relative">
+            <div className="max-w-6xl mx-auto">
+                <div className="mb-16 md:flex justify-between items-end">
+                    <div className="max-w-2xl">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border border-emerald-500/20">
+                            <Shield className="w-3.5 h-3.5" /> Threat Model
                         </div>
-                    ))}
+                        <h2 className="text-3xl md:text-5xl font-black text-white">Military-grade isn't a buzzword here.</h2>
+                    </div>
+                    <p className="text-slate-400 font-body max-w-sm mt-6 md:mt-0">
+                        We use globally audited, open standards to protect your thoughts against sophisticated adversaries.
+                    </p>
                 </div>
 
-                {/* License callout */}
-                <div className="mt-12 p-6 rounded-2xl bg-slate-900 text-white">
-                    <div className="flex items-start gap-4">
-                        <Github className="w-6 h-6 flex-shrink-0 mt-0.5 text-slate-400" />
-                        <div>
-                            <h3 className="font-semibold mb-1">Fully open source — AGPLv3</h3>
-                            <p className="text-sm text-slate-400 leading-relaxed mb-4">
-                                Inkrypt is licensed under the GNU Affero General Public License v3. Every line of code is public. 
-                                You can audit it, self-host it, or fork it. The AGPLv3 ensures that any network-accessible modifications must also be open source.
-                            </p>
-                            <a
-                                href="https://github.com/Sachin-S543/Diary"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 text-sm font-medium text-white underline-offset-4 hover:underline"
-                            >
-                                <Github className="w-4 h-4" /> View source on GitHub
-                            </a>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {protections.map((p, i) => (
+                        <div key={i} className="p-6 rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors">
+                            <div className="w-10 h-10 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center mb-5">
+                                {p.icon}
+                            </div>
+                            <h3 className="font-bold text-white mb-3">{p.title}</h3>
+                            <p className="text-sm text-slate-400 leading-relaxed font-body">{p.description}</p>
                         </div>
-                    </div>
+                    ))}
                 </div>
             </div>
         </section>
@@ -264,52 +332,33 @@ function SecuritySection() {
 }
 
 function RecoverySection() {
-    const steps = [
-        {
-            icon: <Key className="w-5 h-5 text-amber-600" />,
-            title: 'Save your Recovery Key',
-            description: 'When you create your first entry, Inkrypt generates a Recovery Key — a Base64 representation of your derived encryption key. Copy it and store it somewhere safe (password manager, printed paper in a secure place). This is shown only once.',
-        },
-        {
-            icon: <RefreshCw className="w-5 h-5 text-amber-600" />,
-            title: 'Lost your Diary Password?',
-            description: 'If you forget your Diary Password, go to Settings → Recovery. Enter your Recovery Key and set a new Diary Password. Inkrypt will re-encrypt all your entries with the new key.',
-        },
-        {
-            icon: <Download className="w-5 h-5 text-amber-600" />,
-            title: 'Export & Backup',
-            description: 'Use Dashboard → Backup to download all your encrypted entries as a JSON file. Even your backups are encrypted — they\'re useless without your Diary Password or Recovery Key. Restore anytime via Dashboard → Restore.',
-        },
-        {
-            icon: <FileText className="w-5 h-5 text-amber-600" />,
-            title: 'Account loss (server side)',
-            description: 'If your account is deleted from the server, your local IndexedDB cache still contains all encrypted data. You can re-create an account, import your backup file, and all entries will be accessible again using your Diary Password.',
-        },
-    ];
-
     return (
-        <section id="recovery" className="py-20 px-6 bg-amber-50 border-y border-amber-100">
-            <div className="max-w-4xl mx-auto">
-                <h2 className="text-3xl font-bold text-slate-900 text-center mb-4">Recovery & Backup</h2>
-                <p className="text-slate-600 text-center mb-4 max-w-xl mx-auto">
-                    Because we can't read your data, we can't recover it for you. Here's how to make sure you never lose access.
-                </p>
-                <div className="bg-amber-100 border border-amber-200 rounded-xl px-5 py-3 text-sm text-amber-800 text-center mb-12 max-w-lg mx-auto">
-                    ⚠ If you lose both your Diary Password <strong>and</strong> your Recovery Key, your entries cannot be recovered by anyone — including us.
-                </div>
+        <section id="recovery" className="py-24 px-6 relative overflow-hidden bg-slate-900">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
+            
+            <div className="max-w-4xl mx-auto relative z-10">
+                <div className="bg-slate-950 border border-indigo-500/20 rounded-[40px] p-8 md:p-16 text-center shadow-2xl relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px]" />
+                    
+                    <Key className="w-12 h-12 text-indigo-400 mx-auto mb-6" />
+                    <h2 className="text-3xl md:text-4xl font-black text-white mb-6">Absolute Data Sovereignty</h2>
+                    <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-10 font-body">
+                        When you initialize your vault, we provide a 46-character <strong>Vault Recovery Key</strong>. 
+                        Store it safely. If you lose your Diary Password <em>and</em> your Vault Recovery Key, your entries are cryptographically lost forever. We cannot reset it.
+                    </p>
 
-                <div className="space-y-4">
-                    {steps.map((step, i) => (
-                        <div key={i} className="flex gap-4 bg-white rounded-2xl border border-amber-100 p-5">
-                            <div className="w-9 h-9 flex-shrink-0 bg-amber-100 rounded-lg flex items-center justify-center">
-                                {step.icon}
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-slate-900 mb-1 text-sm">{step.title}</h3>
-                                <p className="text-sm text-slate-600 leading-relaxed">{step.description}</p>
-                            </div>
+                    <div className="grid md:grid-cols-2 gap-4 text-left">
+                        <div className="bg-slate-900/80 border border-white/5 rounded-2xl p-6">
+                            <Download className="w-6 h-6 text-slate-400 mb-4" />
+                            <h3 className="text-white font-bold mb-2">Portable Backups</h3>
+                            <p className="text-sm text-slate-400 font-body">Download your encrypted blobs as a JSON file anytime. Import them into any running Inkrypt instance.</p>
                         </div>
-                    ))}
+                        <div className="bg-slate-900/80 border border-white/5 rounded-2xl p-6">
+                            <RefreshCw className="w-6 h-6 text-slate-400 mb-4" />
+                            <h3 className="text-white font-bold mb-2">Password Rotation</h3>
+                            <p className="text-sm text-slate-400 font-body">Use your Vault Recovery Key to seamlessly re-encrypt your VMK wrapper with a new Diary Password if compromised.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -319,52 +368,51 @@ function RecoverySection() {
 function FAQ() {
     const items = [
         {
-            q: 'Is Inkrypt free?',
-            a: 'Yes. The web app is free. You can also self-host the entire stack — the source code is on GitHub under the AGPLv3 license.',
+            q: 'Is Inkrypt really free?',
+            a: 'Yes. Inkrypt is entirely free and open source. If you want maximum privacy, you can clone our GitHub repository and self-host the entire stack on your own hardware.',
         },
         {
-            q: 'Can Inkrypt read my diary?',
-            a: 'No. Technically impossible. Your entries are encrypted on your device before they reach our servers. We store encrypted binary blobs we cannot decrypt.',
+            q: 'Can Inkrypt read my diary if compelled by law?',
+            a: 'No. The architecture uses client-side envelope encryption. Without your local Diary Password or Vault Recovery Key, your vault payloads remain encrypted ciphertext. We cannot decrypt what we do not have the keys for.',
         },
         {
-            q: 'What is the difference between the login password and the Diary Password?',
-            a: 'Your login password (verified server-side with bcrypt) identifies you to the system. Your Diary Password is used client-side to derive the encryption key — it never reaches the server. They are completely separate.',
+            q: 'Why do I have two passwords in the app?',
+            a: 'Your Account Password (verified by our server using bcrypt) manages your subscription and access. Your Diary Password runs purely in your browser to derive your AES-GCM encryption key. The server never observes the second one.',
         },
         {
-            q: 'Does Inkrypt work offline?',
-            a: 'Yes. Entries are cached in an encrypted local IndexedDB. You can read and write offline; changes sync when connectivity resumes.',
-        },
-        {
-            q: 'Can I self-host Inkrypt?',
-            a: 'Yes. Clone the repository, set up PostgreSQL, configure your .env file, and run npm run dev (or build for production). Full instructions are in the README.',
-        },
-        {
-            q: 'What happens to my data if I stop using Inkrypt?',
-            a: 'Export your backup via Dashboard → Backup before leaving. Your encrypted data is portable. The backup file can be imported into any future Inkrypt instance.',
+            q: 'What happens if I lose my internet connection?',
+            a: 'Your vault caches data in an encrypted IndexedDB on your device. You can write securely offline; Inkrypt will seamlessly sync the encrypted blobs when you reconnect.',
         },
     ];
 
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     return (
-        <section id="faq" className="py-20 px-6">
+        <section id="faq" className="py-24 px-6 bg-slate-950">
             <div className="max-w-3xl mx-auto">
-                <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">Frequently asked questions</h2>
-                <div className="space-y-2">
+                <h2 className="text-3xl font-black text-white text-center mb-12">Frequently Asked Questions</h2>
+                <div className="space-y-3">
                     {items.map((item, i) => (
-                        <div key={i} className="border border-slate-100 rounded-xl overflow-hidden">
+                        <div key={i} className="bg-slate-900 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-colors">
                             <button
                                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                                className="w-full flex items-center justify-between px-5 py-4 text-left text-sm font-medium text-slate-800 hover:bg-slate-50 transition-colors"
+                                className="w-full flex items-center justify-between p-6 text-left text-base font-bold text-white"
                             >
                                 {item.q}
-                                <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${openIndex === i ? 'rotate-180' : ''}`} />
+                                <ChevronDown className={`w-5 h-5 text-slate-500 flex-shrink-0 transition-transform ${openIndex === i ? 'rotate-180 text-indigo-400' : ''}`} />
                             </button>
-                            {openIndex === i && (
-                                <div className="px-5 pb-4 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-4">
-                                    {item.a}
-                                </div>
-                            )}
+                            <AnimatePresence>
+                                {openIndex === i && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        className="px-6 text-slate-400 font-body"
+                                    >
+                                        <div className="pb-6">{item.a}</div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     ))}
                 </div>
@@ -375,28 +423,24 @@ function FAQ() {
 
 function CTA() {
     return (
-        <section className="py-20 px-6 bg-slate-900 text-white text-center">
-            <div className="max-w-2xl mx-auto">
-                <InkryptLogo size={48} />
-                <h2 className="text-3xl font-bold mt-6 mb-4">Start writing privately</h2>
-                <p className="text-slate-400 mb-8">
-                    No credit card. No tracking. Your entries are yours — forever.
+        <section className="py-32 px-6 bg-slate-950 text-center relative overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-[400px] bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none" />
+            
+            <div className="max-w-2xl mx-auto relative z-10">
+                <div className="flex justify-center mb-8">
+                    <InkryptLogo size={56} />
+                </div>
+                <h2 className="text-4xl md:text-5xl font-black text-white mb-6">Digital Freedom Awaits.</h2>
+                <p className="text-xl text-slate-400 mb-10 font-body">
+                    Claim your private space today. No credit cards, no tracking—just math and your thoughts.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <Link
                         to="/auth?mode=signup"
-                        className="px-8 py-3.5 bg-white text-slate-900 font-semibold rounded-xl hover:bg-slate-100 transition-colors text-sm"
+                        className="px-8 py-4 bg-indigo-500 text-white font-bold rounded-xl hover:bg-indigo-400 transition-colors text-sm shadow-[0_0_30px_rgba(99,102,241,0.3)] hover:shadow-[0_0_40px_rgba(99,102,241,0.5)]"
                     >
-                        Create free account
+                        Create Your Free Account
                     </Link>
-                    <a
-                        href="https://github.com/Sachin-S543/Diary"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-8 py-3.5 border border-slate-700 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors text-sm flex items-center gap-2"
-                    >
-                        <Github className="w-4 h-4" /> View on GitHub
-                    </a>
                 </div>
             </div>
         </section>
@@ -406,34 +450,20 @@ function CTA() {
 function Footer() {
     const appName = (import.meta.env as unknown as Record<string, string>)['VITE_APP_NAME'] || 'Inkrypt';
     return (
-        <footer className="py-8 px-6 border-t border-slate-100 bg-white">
-            <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
+        <footer className="py-8 px-6 border-t border-white/5 bg-[#020617]">
+            <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-3 opacity-80 hover:opacity-100 transition-opacity">
                     <InkryptLogo size={24} />
-                    <span className="text-sm font-semibold text-slate-700">{appName}</span>
+                    <span className="text-sm font-bold text-slate-300 tracking-wider uppercase">{appName}</span>
                 </div>
-                <nav className="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500">
-                    <a href="#security" className="hover:text-slate-800 transition-colors">Security</a>
-                    <a href="#recovery" className="hover:text-slate-800 transition-colors">Recovery</a>
-                    <a
-                        href="https://github.com/Sachin-S543/Diary"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-slate-800 transition-colors"
-                    >
-                        GitHub
-                    </a>
-                    <a
-                        href="https://www.gnu.org/licenses/agpl-3.0.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-slate-800 transition-colors"
-                    >
-                        AGPLv3 License
-                    </a>
+                <nav className="flex flex-wrap items-center justify-center gap-8 text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                    <a href="#security" className="hover:text-indigo-400 transition-colors">Security</a>
+                    <a href="#recovery" className="hover:text-indigo-400 transition-colors">Recovery</a>
+                    <a href="https://github.com/Sachin-S543/Diary" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5"><Github className="w-3.5 h-3.5"/> GitHub</a>
+                    <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">AGPLv3 License</a>
                 </nav>
-                <p className="text-xs text-slate-400">
-                    © {new Date().getFullYear()} Sachin-S543 · AGPLv3
+                <p className="text-xs text-slate-600 font-semibold uppercase tracking-widest">
+                    © {new Date().getFullYear()} Sachin-S543
                 </p>
             </div>
         </footer>
@@ -443,14 +473,17 @@ function Footer() {
 // ─── Main Page ─────────────────────────────────────────────────────────────
 export default function LandingPage() {
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-slate-950 font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
             <NavBar />
-            <Hero />
-            <HowItWorks />
-            <SecuritySection />
-            <RecoverySection />
-            <FAQ />
-            <CTA />
+            <main>
+                <Hero />
+                <HowItWorks />
+                <FeaturesGrid />
+                <SecuritySection />
+                <RecoverySection />
+                <FAQ />
+                <CTA />
+            </main>
             <Footer />
         </div>
     );

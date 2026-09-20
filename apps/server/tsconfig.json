@@ -1,11 +1,14 @@
+
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "outDir": "./dist",
-        "rootDir": "./src",
+        "rootDir": "../../",
         "module": "commonjs",
         "target": "es2020",
         "esModuleInterop": true,
+        "skipLibCheck": true,
+        "baseUrl": ".",
         "paths": {
             "@secret-capsule/types": [
                 "../../packages/types/src/index.ts"
@@ -13,6 +16,7 @@
         }
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "../../packages/types/src/**/*"
     ]
 }

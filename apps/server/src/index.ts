@@ -28,14 +28,43 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(helmet());
+// Security Middleware
+app.use(helmet({
+    contentSecurityPolicy: true,
+    crossOriginEmbedderPolicy: true,
+}));
+
 app.use(cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    credentials: true
+    credentials: true,
 }));
-app.use(express.json());
+
+// Bound JSON body size to prevent payload exhaustion attacks
+app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
+
+// IP-based request throttling
+const requestRateMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_REQUESTS_PER_WINDOW = 300;
+
+app.use((req, res, next) => {
+    const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.ip || 'global';
+    const now = Date.now();
+
+    const record = requestRateMap.get(clientIp);
+    if (!record || now > record.resetAt) {
+        requestRateMap.set(clientIp, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+        return next();
+    }
+
+    if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+        return res.status(429).json({ message: 'Too many requests. Please try again later.' });
+    }
+
+    record.count++;
+    next();
+});
 
 // Health Check
 app.get("/health", (_req: express.Request, res: express.Response) => {
