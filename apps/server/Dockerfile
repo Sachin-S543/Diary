@@ -8,6 +8,7 @@ COPY tsconfig.base.json ./
 
 # Copy all workspaces package files
 COPY apps/server/package.json ./apps/server/
+COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/types/package.json ./packages/types/
 COPY packages/crypto-utils/package.json ./packages/crypto-utils/
 COPY packages/ui/package.json ./packages/ui/
@@ -18,8 +19,11 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Build workspaces
-RUN npm run build
+# Build backend server and its dependent workspaces
+RUN npm run build --workspace=@secret-capsule/types && \
+    npm run build --workspace=@secret-capsule/crypto-utils && \
+    npm run build --workspace=@secret-capsule/ui && \
+    npm run build --workspace=@secret-capsule/server
 
 # Production stage
 FROM node:20-alpine
