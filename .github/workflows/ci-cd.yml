@@ -1,16 +1,24 @@
-name: CI/CD
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout Repository
@@ -29,14 +37,24 @@ jobs:
         run: npm run test --workspaces
 
       - name: Build Monorepo Workspaces
-        run: npm run build --workspaces
+        run: npm run build
 
       - name: Prepare 404 SPA Fallback
         run: node -e "require('fs').copyFileSync('apps/frontend/dist/index.html', 'apps/frontend/dist/404.html')"
 
-      - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./apps/frontend/dist
+          path: ./apps/frontend/dist
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build-and-test
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

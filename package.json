@@ -13,7 +13,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "npm run build --workspace=@secret-capsule/types && npm run build --workspace=@secret-capsule/crypto-utils && npm run build --workspace=@secret-capsule/ui && npm run build --workspace=@secret-capsule/server && npm run build --workspace=@secret-capsule/frontend",
     "dev": "concurrently \"npm run dev --workspace=@secret-capsule/server\" \"npm run dev --workspace=@secret-capsule/frontend\"",
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspace=@secret-capsule/frontend",
