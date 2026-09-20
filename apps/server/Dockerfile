@@ -18,11 +18,8 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Build types first
-RUN npm run build -w packages/types
-
-# Build server
-RUN npm run build -w apps/server
+# Build workspaces
+RUN npm run build
 
 # Production stage
 FROM node:18-alpine
