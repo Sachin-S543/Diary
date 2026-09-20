@@ -30,11 +30,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: Build frontend
-        run: npm run build --workspace=@secret-capsule/frontend
+      - name: Build workspaces
+        run: npm run build --workspaces
         env:
-          VITE_USE_MOCK_API: "true"
+          VITE_USE_MOCK_API: "false"
           VITE_API_URL: "http://localhost:3001"
+
+      - name: Prepare 404 SPA fallback
+        run: node -e "require('fs').copyFileSync('apps/frontend/dist/index.html', 'apps/frontend/dist/404.html')"
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
