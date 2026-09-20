@@ -21,20 +21,23 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run Workspace Tests
-        run: npm run test --workspaces
-
       - name: Build Monorepo Workspaces
         run: npm run build
 
+      - name: Run Tests
+        run: |
+          npm run test --workspace=@secret-capsule/crypto-utils
+          npm run test --workspace=@secret-capsule/server
+          npm run test --workspace=@secret-capsule/frontend
+
       - name: Prepare 404 SPA Fallback
-        run: node -e "require('fs').copyFileSync('apps/frontend/dist/index.html', 'apps/frontend/dist/404.html')"
+        run: cp apps/frontend/dist/index.html apps/frontend/dist/404.html
 
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'

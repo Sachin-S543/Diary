@@ -1,22 +1,22 @@
-
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "outDir": "./dist",
-        "rootDir": "../../",
+        "rootDir": "./src",
         "module": "commonjs",
         "target": "es2020",
         "esModuleInterop": true,
         "skipLibCheck": true,
-        "baseUrl": ".",
-        "paths": {
-            "@secret-capsule/types": [
-                "../../packages/types/src/index.ts"
-            ]
-        }
+        "noEmit": false,
+        "allowImportingTsExtensions": false
     },
     "include": [
-        "src/**/*",
-        "../../packages/types/src/**/*"
+        "src/**/*"
+    ],
+    "exclude": [
+        "src/**/__tests__/**",
+        "src/**/*.test.ts",
+        "dist/**",
+        "node_modules"
     ]
 }
