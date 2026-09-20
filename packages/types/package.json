@@ -1,11 +1,10 @@
 {
     "name": "@secret-capsule/types",
     "version": "0.0.0",
-    "main": "./src/index.ts",
-    "types": "./src/index.ts",
+    "types": "./src/index.d.ts",
     "scripts": {
         "lint": "eslint .",
-        "build": "echo 'No build needed — types-only package'",
+        "build": "echo 'No build needed — types-only package (.d.ts)'",
         "test": "echo 'No tests in package'"
     },
     "devDependencies": {
