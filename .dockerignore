@@ -1,0 +1,44 @@
+# Dependencies — Docker installs these fresh via npm ci
+node_modules
+**/node_modules
+
+# Build outputs — Docker builds these from source
+dist
+**/dist
+apps/frontend/dist
+
+# TypeScript incremental build info — must be absent so tsc rebuilds cleanly
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Local environment secrets
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+
+# Git / IDE
+.git
+.gitignore
+.vscode
+.idea
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Test coverage and reports
+coverage
+**/coverage
+
+# Documentation (not needed in Docker image)
+*.md
+LICENSE
+ABOUT.md
+DESIGN.md
+CONTRIBUTING.md
+PREREQUISITES.md
+CODE_OF_CONDUCT.md
+THREAT_MODEL.md
+SECURITY.md

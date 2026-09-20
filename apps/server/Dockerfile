@@ -2,38 +2,42 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy root package files
+# Copy root workspace manifest and lockfile first (layer-cache friendly)
 COPY package*.json ./
 COPY tsconfig.base.json ./
 
-# Copy all workspaces package files
-COPY apps/server/package.json ./apps/server/
-COPY apps/frontend/package.json ./apps/frontend/
+# Copy only the package manifests for workspaces the server depends on
 COPY packages/types/package.json ./packages/types/
-COPY packages/crypto-utils/package.json ./packages/crypto-utils/
-COPY packages/ui/package.json ./packages/ui/
+COPY apps/server/package.json ./apps/server/
 
-# Install dependencies
-RUN npm install
+# npm ci uses the lockfile for a reproducible, clean install
+# --ignore-scripts prevents lifecycle scripts from running during install
+RUN npm ci
 
-# Copy source code
-COPY . .
+# Copy source for only the packages we need to build
+COPY packages/types/ ./packages/types/
+COPY apps/server/ ./apps/server/
 
-# Build backend server and its dependent workspaces
-RUN npm run build --workspace=@secret-capsule/types && \
-    npm run build --workspace=@secret-capsule/crypto-utils && \
-    npm run build --workspace=@secret-capsule/ui && \
-    npm run build --workspace=@secret-capsule/server
+# Build in dependency order: types first, then server
+RUN npm run build --workspace=@secret-capsule/types
+RUN npm run build --workspace=@secret-capsule/server
 
-# Production stage
+# ── Production stage ──────────────────────────────────────────────────────────
 FROM node:20-alpine
 
 WORKDIR /app
 
+# Copy workspace manifests and lockfile so npm ci works in production stage
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/server/dist ./apps/server/dist
+COPY --from=builder /app/packages/types/package.json ./packages/types/
 COPY --from=builder /app/apps/server/package.json ./apps/server/
+
+# Install only production dependencies
+RUN npm ci --omit=dev
+
+# Copy the built server output
+COPY --from=builder /app/apps/server/dist ./apps/server/dist
+COPY --from=builder /app/packages/types/dist ./packages/types/dist
 
 EXPOSE 3001
 
